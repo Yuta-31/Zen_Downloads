@@ -1,0 +1,19 @@
+{
+  "manifest_version": 3,
+  "name": "Download Helper",
+  "version": "0.1.0",
+  "description": "URL に応じてダウンロード先フォルダを自動で振り分ける拡張機能。",
+  "icons": {
+    "128": "icon128.png"
+  },
+  "permissions": ["downloads", "downloads.shelf", "storage"],
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+  "action": {
+    "default_popup": "popup/index.html",
+    "default_title": "Download Helper"
+  },
+  "options_page": "options/index.html"
+}
