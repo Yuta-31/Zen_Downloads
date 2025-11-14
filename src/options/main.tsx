@@ -1,5 +1,7 @@
 import React, { useState } from "react";
 import ReactDOM from "react-dom/client";
+// import { saveRules } from "@/lib/storage";
+// import type { RulesConfig } from "@/schemas/rules";
 
 type RuleMode = "domain" | "domain-path";
 
@@ -10,6 +12,10 @@ const App: React.FC = () => {
     setMode(value);
     // TODO: 後で chrome.storage.sync に保存する処理を書く
   };
+
+  // const handleSaveRules = async (editedRulesConfig: RulesConfig) => {
+  //   await saveRules(editedRulesConfig)
+  // }
 
   return (
     <div style={{ padding: 16, maxWidth: 480 }}>

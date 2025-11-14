@@ -1,5 +1,6 @@
 import { defineConfig } from "vite";
 import { resolve } from "path";
+import { fileURLToPath } from "url";
 
 export default defineConfig({
   build: {
@@ -14,5 +15,11 @@ export default defineConfig({
     outDir: "dist",
     minify: false,
     sourcemap: true,
+    emptyOutDir: false,
   },
+  resolve: {
+    alias: {
+      "@": fileURLToPath(new URL("./src", import.meta.url))
+    }
+  }
 });
