@@ -1,4 +1,4 @@
-import type { EvalCtx } from "@/lib/rule-engine";
+import type { EvalCtx } from "@/lib/rules/engine";
 import { sanitizeSegment } from "@/lib/sanitize";
 
 

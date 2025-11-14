@@ -20,3 +20,9 @@ export const sanitizeSegment = (name: string): string => {
   if (s.length > 20) s = s.slice(0, 20);
   return s
 }
+
+export const sanitizePath = (path: string): string => {
+  const parts = path.split("/").filter(p => p.length > 0);
+  const safe = parts.map(sanitizeSegment);
+  return safe.join("/");
+};
