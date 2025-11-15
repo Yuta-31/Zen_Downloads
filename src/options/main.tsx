@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import ReactDOM from "react-dom/client";
+import "@/index.css";
 
 import {
   RulesConfigSchema,
@@ -13,6 +14,7 @@ import { expandTemplate } from "@/lib/template";
 import { sanitizePath } from "@/lib/sanitize";
 
 import { sendMessage } from "@/lib/message";
+import RuleList from "./components/RuleList";
 
 /** ユーティリティ */
 const clone = <T,>(x: T) => JSON.parse(JSON.stringify(x)) as T;
@@ -199,40 +201,7 @@ const App: React.FC = () => {
         </div>
 
         {/* ルール軽操作 */}
-        <h2 style={{ marginTop: 24, fontSize: 16 }}>
-          ルール一覧（有効化・並べ替え）
-        </h2>
-        <div className="row" style={{ marginBottom: 8 }}>
-          <button onClick={addRule}>+ ルールを追加</button>
-        </div>
-        <ul className="list">
-          {cfg.rules.map((r, i) => (
-            <li key={r.id} className="row" style={{ marginBottom: 6 }}>
-              <code className="pill">{r.id}</code>
-              <span>{r.name}</span>
-              <span className="muted">{r.domains.join(", ")}</span>
-              <span className="right muted">{r.enabled ? "有効" : "無効"}</span>
-              <button onClick={() => toggleEnable(r.id)}>
-                {r.enabled ? "無効化" : "有効化"}
-              </button>
-              <button disabled={i === 0} onClick={() => move(r.id, -1)}>
-                ↑
-              </button>
-              <button
-                disabled={i === cfg.rules.length - 1}
-                onClick={() => move(r.id, +1)}
-              >
-                ↓
-              </button>
-              <button
-                onClick={() => removeRule(r.id)}
-                style={{ color: "#b00020" }}
-              >
-                削除
-              </button>
-            </li>
-          ))}
-        </ul>
+        <RuleList cfg={cfg} />
       </section>
 
       {/* 右：プレビュー */}
