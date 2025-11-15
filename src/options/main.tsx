@@ -1,7 +1,11 @@
 import React, { useEffect, useMemo, useState } from "react";
 import ReactDOM from "react-dom/client";
 
-import { RulesConfigSchema, type RulesConfig, type Rule } from "@/schemas/rules";
+import {
+  RulesConfigSchema,
+  type RulesConfig,
+  type Rule,
+} from "@/schemas/rules";
 import { DEFAULT_RULES } from "@/lib/rules/type";
 import { readRules, writeRules, importRules } from "@/lib/rules/storage";
 import { buildCtx, inDomain, matchAll } from "@/lib/rules/engine";
@@ -16,7 +20,9 @@ const clone = <T,>(x: T) => JSON.parse(JSON.stringify(x)) as T;
 const App: React.FC = () => {
   // 設定
   const [cfg, setCfg] = useState<RulesConfig>(DEFAULT_RULES);
-  const [jsonText, setJsonText] = useState<string>(JSON.stringify(DEFAULT_RULES, null, 2));
+  const [jsonText, setJsonText] = useState<string>(
+    JSON.stringify(DEFAULT_RULES, null, 2)
+  );
   const [jsonError, setJsonError] = useState<string>("");
 
   // プレビュー
@@ -61,14 +67,14 @@ const App: React.FC = () => {
   // 有効/無効トグル & 並べ替え
   const toggleEnable = (id: string) => {
     const next = clone(cfg);
-    const r = next.rules.find(x => x.id === id)!;
+    const r = next.rules.find((x) => x.id === id)!;
     r.enabled = !r.enabled;
     setCfg(next);
     setJsonText(JSON.stringify(next, null, 2));
   };
   const move = (id: string, dir: -1 | 1) => {
     const next = clone(cfg);
-    const i = next.rules.findIndex(x => x.id === id);
+    const i = next.rules.findIndex((x) => x.id === id);
     const j = i + dir;
     if (i < 0 || j < 0 || j >= next.rules.length) return;
     const [r] = next.rules.splice(i, 1);
@@ -84,14 +90,14 @@ const App: React.FC = () => {
       enabled: true,
       domains: ["*"],
       conditions: [],
-      actions: { pathTemplate: "{host}/{file}", conflict: "uniquify" }
+      actions: { pathTemplate: "{host}/{file}", conflict: "uniquify" },
     });
     setCfg(next);
     setJsonText(JSON.stringify(next, null, 2));
   };
   const removeRule = (id: string) => {
     const next = clone(cfg);
-    next.rules = next.rules.filter(r => r.id !== id);
+    next.rules = next.rules.filter((r) => r.id !== id);
     setCfg(next);
     setJsonText(JSON.stringify(next, null, 2));
   };
@@ -100,11 +106,17 @@ const App: React.FC = () => {
   const preview = useMemo(() => {
     try {
       const ctx = buildCtx(testUrl, testFile);
-      const enabled = cfg.rules.filter(r => r.enabled);
-      const matched = enabled.find(r => inDomain(r.domains, ctx.host) && matchAll(r.conditions, ctx));
-      if (!matched) return { match: undefined as Rule | undefined, path: "(既定の保存先)" };
+      const enabled = cfg.rules.filter((r) => r.enabled);
+      const matched = enabled.find(
+        (r) => inDomain(r.domains, ctx.host) && matchAll(r.conditions, ctx)
+      );
+      if (!matched)
+        return { match: undefined as Rule | undefined, path: "(既定の保存先)" };
 
-      const out = expandTemplate(matched.actions.pathTemplate ?? "{host}/{file}", ctx);
+      const out = expandTemplate(
+        matched.actions.pathTemplate ?? "{host}/{file}",
+        ctx
+      );
       return { match: matched, path: sanitizePath(out) };
     } catch {
       return { match: undefined, path: "(URLが不正)" };
@@ -115,19 +127,21 @@ const App: React.FC = () => {
   const onExport = async () => {
     const text = JSON.stringify(cfg, null, 2);
     const res = await sendMessage<{ id: number }>({
-      type: "export-rules",
-      filename: "download-helper-rules.json",
-      json: text
+      command: "export-rules",
+      payload: {
+        filename: "download-helper-rules.json",
+        json: text,
+      },
     });
     if (!res.ok) {
       alert("Export failed: " + res.error);
-      return
+      return;
     }
   };
   const onImportFile = async (file: File) => {
     try {
       const text = await file.text();
-      await importRules(text);       // Zod検証を通して保存
+      await importRules(text); // Zod検証を通して保存
       const reloaded = await readRules();
       setCfg(reloaded);
       setJsonText(JSON.stringify(reloaded, null, 2));
@@ -143,9 +157,15 @@ const App: React.FC = () => {
       {/* 左：JSONエディタ */}
       <section>
         <h1>Rules (JSON)</h1>
-        <p className="muted">上から順に評価し、最初にマッチしたルールを適用します。保存時に Zod で検証されます。</p>
+        <p className="muted">
+          上から順に評価し、最初にマッチしたルールを適用します。保存時に Zod
+          で検証されます。
+        </p>
 
-        <textarea value={jsonText} onChange={(e) => onJsonChange(e.target.value)} />
+        <textarea
+          value={jsonText}
+          onChange={(e) => onJsonChange(e.target.value)}
+        />
 
         {jsonError ? (
           <pre className="err">{jsonError}</pre>
@@ -155,7 +175,13 @@ const App: React.FC = () => {
 
         <div className="row" style={{ marginTop: 8 }}>
           <button onClick={save}>保存</button>
-          <button onClick={() => { setCfg(DEFAULT_RULES); setJsonText(JSON.stringify(DEFAULT_RULES, null, 2)); setJsonError(""); }}>
+          <button
+            onClick={() => {
+              setCfg(DEFAULT_RULES);
+              setJsonText(JSON.stringify(DEFAULT_RULES, null, 2));
+              setJsonError("");
+            }}
+          >
             デフォルトに戻す
           </button>
           <span className="right" />
@@ -164,13 +190,18 @@ const App: React.FC = () => {
             <input
               type="file"
               accept="application/json"
-              onChange={(e) => e.currentTarget.files?.[0] && onImportFile(e.currentTarget.files[0])}
+              onChange={(e) =>
+                e.currentTarget.files?.[0] &&
+                onImportFile(e.currentTarget.files[0])
+              }
             />
           </label>
         </div>
 
         {/* ルール軽操作 */}
-        <h2 style={{ marginTop: 24, fontSize: 16 }}>ルール一覧（有効化・並べ替え）</h2>
+        <h2 style={{ marginTop: 24, fontSize: 16 }}>
+          ルール一覧（有効化・並べ替え）
+        </h2>
         <div className="row" style={{ marginBottom: 8 }}>
           <button onClick={addRule}>+ ルールを追加</button>
         </div>
@@ -181,10 +212,24 @@ const App: React.FC = () => {
               <span>{r.name}</span>
               <span className="muted">{r.domains.join(", ")}</span>
               <span className="right muted">{r.enabled ? "有効" : "無効"}</span>
-              <button onClick={() => toggleEnable(r.id)}>{r.enabled ? "無効化" : "有効化"}</button>
-              <button disabled={i === 0} onClick={() => move(r.id, -1)}>↑</button>
-              <button disabled={i === cfg.rules.length - 1} onClick={() => move(r.id, +1)}>↓</button>
-              <button onClick={() => removeRule(r.id)} style={{ color: "#b00020" }}>削除</button>
+              <button onClick={() => toggleEnable(r.id)}>
+                {r.enabled ? "無効化" : "有効化"}
+              </button>
+              <button disabled={i === 0} onClick={() => move(r.id, -1)}>
+                ↑
+              </button>
+              <button
+                disabled={i === cfg.rules.length - 1}
+                onClick={() => move(r.id, +1)}
+              >
+                ↓
+              </button>
+              <button
+                onClick={() => removeRule(r.id)}
+                style={{ color: "#b00020" }}
+              >
+                削除
+              </button>
             </li>
           ))}
         </ul>
@@ -196,11 +241,19 @@ const App: React.FC = () => {
         <div className="grid" style={{ marginTop: 8 }}>
           <label>
             テストURL
-            <input value={testUrl} onChange={(e) => setTestUrl(e.target.value)} style={{ width: "100%" }} />
+            <input
+              value={testUrl}
+              onChange={(e) => setTestUrl(e.target.value)}
+              style={{ width: "100%" }}
+            />
           </label>
           <label>
             推定ファイル名（空ならURL末尾）
-            <input value={testFile} onChange={(e) => setTestFile(e.target.value)} style={{ width: "100%" }} />
+            <input
+              value={testFile}
+              onChange={(e) => setTestFile(e.target.value)}
+              style={{ width: "100%" }}
+            />
           </label>
         </div>
 
@@ -208,18 +261,28 @@ const App: React.FC = () => {
           <div className="muted">マッチしたルール</div>
           {preview.match ? (
             <>
-              <div><b>{preview.match.name}</b></div>
-              <div className="muted" style={{ fontSize: 12 }}>{preview.match.actions.pathTemplate}</div>
+              <div>
+                <b>{preview.match.name}</b>
+              </div>
+              <div className="muted" style={{ fontSize: 12 }}>
+                {preview.match.actions.pathTemplate}
+              </div>
             </>
           ) : (
             <div className="muted">（マッチなし → 既定の保存ルールが適用）</div>
           )}
 
-          <div style={{ marginTop: 12 }} className="muted">最終パス</div>
+          <div style={{ marginTop: 12 }} className="muted">
+            最終パス
+          </div>
           <code className="code">{preview.path}</code>
 
           <div style={{ marginTop: 8, fontSize: 12 }} className="muted">
-            使えるトークン例: {"{host} {file} {basename} {ext} {yyyy-mm-dd} {path[0]} {path[1..3]} {lower:ext} {sanitize:file}"} / {"query.foo"}
+            使えるトークン例:{" "}
+            {
+              "{host} {file} {basename} {ext} {yyyy-mm-dd} {path[0]} {path[1..3]} {lower:ext} {sanitize:file}"
+            }{" "}
+            / {"query.foo"}
           </div>
         </div>
       </section>
