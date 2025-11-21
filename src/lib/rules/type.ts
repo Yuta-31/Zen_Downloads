@@ -8,11 +8,28 @@ export const DEFAULT_RULES: RulesConfig = {
       name: "Wordの拡張子で保存",
       enabled: true,
       domains: ["*"],
-      conditions: [{ key: "ext", op: "in", value: ["doc", "docx"]}],
+      conditions: [{ key: "ext", op: "in", value: ["doc", "docx"] }],
       actions: {
         pathTemplate: "{host}/images/{ext}/{yyyy-mm-dd}/{file}",
-        conflict: "uniquify"
-      }
+        conflict: "uniquify",
+      },
+    },
+    {
+      id: "r-images",
+      name: "画像ファイルで保存",
+      enabled: true,
+      domains: ["*"],
+      conditions: [
+        {
+          key: "ext",
+          op: "in",
+          value: ["png", "jpg", "jpeg", "gif", "webp", "svg"],
+        },
+      ],
+      actions: {
+        pathTemplate: "{host}/images/{ext}/{yyyy-mm-dd}/{file}",
+        conflict: "uniquify",
+      },
     },
     {
       id: "r-catch-all",
@@ -20,22 +37,27 @@ export const DEFAULT_RULES: RulesConfig = {
       enabled: true,
       domains: ["*"],
       conditions: [],
-      actions: { pathTemplate: "{host}/{file}", conflict: "uniquify" }
-    }
-  ]
-}
+      actions: { pathTemplate: "{host}/{file}", conflict: "uniquify" },
+    },
+  ],
+};
 
 export const parseRuleConfig = (raw: unknown): RulesConfig =>
   RulesConfigSchema.parse(raw);
 
-export const safeParseRulesConfig = (raw: unknown): { ok: true; data: RulesConfig } | { ok: false; data: RulesConfig; error: string } => {
+export const safeParseRulesConfig = (
+  raw: unknown
+):
+  | { ok: true; data: RulesConfig }
+  | { ok: false; data: RulesConfig; error: string } => {
   const res = RulesConfigSchema.safeParse(raw);
   if (res.success) return { ok: true, data: res.data };
-  return { 
-    ok: false, 
-    data: DEFAULT_RULES, 
-    error: res.error.flatten().formErrors.concat(
-      Object.values(res.error.flatten().fieldErrors).flat()
-    ).join("\n") 
+  return {
+    ok: false,
+    data: DEFAULT_RULES,
+    error: res.error
+      .flatten()
+      .formErrors.concat(Object.values(res.error.flatten().fieldErrors).flat())
+      .join("\n"),
   };
-}
+};
