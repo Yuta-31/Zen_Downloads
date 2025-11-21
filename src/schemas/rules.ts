@@ -55,6 +55,5 @@ export const RulesConfigSchema = z.object({
   rules: z.array(RuleSchema),
 });
 
-export type RuleSchemaType = z.infer<typeof RuleSchema>;
 export type RulesConfig = z.infer<typeof RulesConfigSchema>;
 export type Rule = z.infer<typeof RuleSchema>;

@@ -14,7 +14,7 @@ import { expandTemplate } from "@/lib/template";
 import { sanitizePath } from "@/lib/sanitize";
 
 import { sendMessage } from "@/lib/message";
-import RuleList from "./components/RuleList";
+import RuleList from "./components/RuleList/RuleList";
 
 /** ユーティリティ */
 const clone = <T,>(x: T) => JSON.parse(JSON.stringify(x)) as T;
