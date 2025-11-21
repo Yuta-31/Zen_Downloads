@@ -118,7 +118,7 @@ const RuleHeader = ({
     >
       <motion.div
         className={[
-          "w-full h-full cursor-grab",
+          "w-full h-full",
           "flex items-center justify-center",
           "transition-all duration-150 ease-in-out",
           "rounded-l-xl",
@@ -126,6 +126,9 @@ const RuleHeader = ({
           isDragging
             ? "translate-y-0 shadow-inner border-b-[0px]"
             : "hover:shadow-md hover:border-b-[2px]",
+          isOpen
+            ? "pointer-events-none cursor-default"
+            : "pointer-events-auto cursor-grab",
         ].join(" ")}
         animate={{
           width: isOpen ? 0 : 35,
