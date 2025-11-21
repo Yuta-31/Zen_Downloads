@@ -20,7 +20,7 @@ interface RuleListProps {
 
 const mockCfg: RulesConfig = DEFAULT_RULES;
 
-const RuleList = (props: RuleListProps) => {
+const RuleList = ({ cfg }: RuleListProps) => {
   const [selectedRule, setSelectedRule] = useState<Rule | null>(null);
   const [rules, setRules] = useState<Rule[]>(mockCfg.rules);
   const [draggingRuleId, setDraggingRuleId] = useState<string | null>(null);
@@ -101,7 +101,10 @@ const RuleList = (props: RuleListProps) => {
                 onClick={() => setSelectedRule(rule)}
                 isDragging={draggingRuleId === rule.id}
                 onDragStart={() => setDraggingRuleId(rule.id)}
-                onDragEnd={() => setDraggingRuleId(null)}
+                onDragEnd={() => {
+                  setDraggingRuleId(null);
+                  // TODO: Save order to config
+                }}
               />
             ))}
           </Reorder.Group>
@@ -158,6 +161,7 @@ const RuleReorderItem = ({
         isOpen={isOpen}
         isDragging={isDragging}
         onDragStart={onDragStart}
+        onDragEnd={onDragEnd}
       />
     </Reorder.Item>
   );

@@ -15,6 +15,7 @@ interface RuleListRowCardProps {
   isOpen?: boolean;
   isDragging: boolean;
   onDragStart: () => void;
+  onDragEnd: () => void;
 }
 
 const CARD_ANIM_MS = 300;
@@ -27,6 +28,7 @@ const RuleListRowCard = ({
   isOpen,
   isDragging,
   onDragStart,
+  onDragEnd,
 }: RuleListRowCardProps) => {
   const [isCardOpen, setIsCardOpen] = useState(false);
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
@@ -74,6 +76,7 @@ const RuleListRowCard = ({
         onClick={onClick}
         isDragging={isDragging}
         onDragStart={onDragStart}
+        onDragEnd={onDragEnd}
       />
       <div
         className={[
@@ -94,6 +97,7 @@ interface RuleHeaderProps {
   onDrag: DragControls;
   isDragging: boolean;
   onDragStart: () => void;
+  onDragEnd: () => void;
 }
 
 const RuleHeader = ({
@@ -103,34 +107,48 @@ const RuleHeader = ({
   onDrag,
   isDragging,
   onDragStart,
+  onDragEnd,
 }: RuleHeaderProps) => {
   return (
-    <div className={`pr-4 ${!isOpen && "grid grid-cols-[35px_1fr]"}`}>
-      {!isOpen && (
-        <div
-          className={[
-            "w-full h-full cursor-grab",
-            "flex items-center justify-center",
-            "transition-all duration-150 ease-in-out",
-            "rounded-l-xl",
-            isDragging
-              ? "translate-y-0 shadow-inner border-b-[0px]"
-              : "hover:shadow-md hover:border-b-[2px]",
-          ].join(" ")}
-          onPointerDown={(e) => {
-            e.preventDefault();
-            onDrag.start(e);
-            onDragStart();
-          }}
-        >
-          <GripVertical className="text-stone-400" size="30" />
-        </div>
-      )}
+    <div
+      className={[
+        "pr-4 transition-all duration-150 ease-in-out",
+        "grid grid-cols-[auto_1fr]",
+      ].join(" ")}
+    >
+      <motion.div
+        className={[
+          "w-full h-full cursor-grab",
+          "flex items-center justify-center",
+          "transition-all duration-150 ease-in-out",
+          "rounded-l-xl",
+          "border-r border-stone-100",
+          isDragging
+            ? "translate-y-0 shadow-inner border-b-[0px]"
+            : "hover:shadow-md hover:border-b-[2px]",
+        ].join(" ")}
+        animate={{
+          width: isOpen ? 0 : 35,
+          opacity: isOpen ? 0 : 1,
+        }}
+        transition={{
+          width: { duration: 0.2, ease: "easeInOut" },
+          opacity: { duration: 0.12, ease: "easeOut" },
+        }}
+        onPointerDown={(e) => {
+          e.preventDefault();
+          onDrag.start(e);
+          onDragStart();
+        }}
+        onPointerUp={() => {
+          onDragEnd();
+        }}
+      >
+        <GripVertical className="text-stone-400" size="30" />
+      </motion.div>
 
       <div
-        className={
-          "flex justify-between items-center py-6" + (isOpen ? " pl-4" : "")
-        }
+        className={"flex justify-between items-center py-6 ms-2"}
         onClick={onClick}
       >
         <div className="font-bold ml-2">{rule.name}</div>
