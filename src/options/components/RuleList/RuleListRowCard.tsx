@@ -2,28 +2,39 @@ import { Card } from "@/components/ui/card";
 import type { Rule } from "@/schemas/rules";
 import { Switch } from "@/components/ui/switch";
 import { ChevronRight } from "lucide-react";
-import { motion } from "framer-motion";
+import { DragControls, motion } from "framer-motion";
 import { useEffect, useState } from "react";
+import { GripVertical } from "lucide-react";
 
 const MotionCard = motion(Card);
 
 interface RuleListRowCardProps {
   rule: Rule;
-  onClick?: () => void;
+  onClick: () => void;
+  onDrag: DragControls;
   isOpen?: boolean;
+  isDragging: boolean;
+  onDragStart: () => void;
 }
 
 const CARD_ANIM_MS = 300;
 const DETAIL_ANIM_MS = 200;
 
-const RuleListRowCard = (props: RuleListRowCardProps) => {
+const RuleListRowCard = ({
+  rule,
+  onClick,
+  onDrag,
+  isOpen,
+  isDragging,
+  onDragStart,
+}: RuleListRowCardProps) => {
   const [isCardOpen, setIsCardOpen] = useState(false);
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
 
   useEffect(() => {
     let timer: number | undefined;
 
-    if (props.isOpen) {
+    if (isOpen) {
       setIsCardOpen(true);
       timer = window.setTimeout(() => {
         setIsDetailsOpen(true);
@@ -38,17 +49,16 @@ const RuleListRowCard = (props: RuleListRowCardProps) => {
     return () => {
       if (timer) window.clearTimeout(timer);
     };
-  }, [props.isOpen]);
+  }, [isOpen]);
 
   return (
     <MotionCard
       layout
       onClick={() => {
-        console.log(`Clicked on rule: ${props.rule.name}`);
-        props.onClick?.();
+        console.log(`Clicked on rule: ${rule.name}`);
       }}
       className={[
-        "bg-background cursor-pointer gap-0",
+        "bg-background cursor-pointer gap-0 p-0",
         isCardOpen
           ? "fixed inset-x-4 top-16 z-50 mx-auto max-w-3xl shadow-lg flex flex-col overflow-hidden z-50"
           : "w-full",
@@ -57,14 +67,21 @@ const RuleListRowCard = (props: RuleListRowCardProps) => {
         layout: { duration: CARD_ANIM_MS / 1000, ease: "easeInOut" },
       }}
     >
-      <RuleHeader rule={props.rule} onClickClose={undefined} />
+      <RuleHeader
+        rule={rule}
+        isOpen={isCardOpen}
+        onDrag={onDrag}
+        onClick={onClick}
+        isDragging={isDragging}
+        onDragStart={onDragStart}
+      />
       <div
         className={[
           `transition-[max-height] duration-${DETAIL_ANIM_MS} ease-in-out overflow-hidden`,
           isDetailsOpen ? "max-h-[1000px]" : "max-h-0",
         ].join(" ")}
       >
-        <RuleDetails rule={props.rule} />
+        <RuleDetails rule={rule} />
       </div>
     </MotionCard>
   );
@@ -72,16 +89,56 @@ const RuleListRowCard = (props: RuleListRowCardProps) => {
 
 interface RuleHeaderProps {
   rule: Rule;
-  onClickClose?: (() => void) | undefined;
+  isOpen: boolean;
+  onClick: () => void;
+  onDrag: DragControls;
+  isDragging: boolean;
+  onDragStart: () => void;
 }
 
-const RuleHeader = ({ rule, onClickClose }: RuleHeaderProps) => {
+const RuleHeader = ({
+  rule,
+  isOpen,
+  onClick,
+  onDrag,
+  isDragging,
+  onDragStart,
+}: RuleHeaderProps) => {
   return (
-    <div className="px-4 flex justify-between items-center">
-      <div className="font-bold">{rule.name}</div>
-      <div className="flex gap-4 items-center">
-        <Switch className="cursor-pointer" checked={rule.enabled} />
-        <ChevronRight />
+    <div className={`pr-4 ${!isOpen && "grid grid-cols-[35px_1fr]"}`}>
+      {!isOpen && (
+        <div
+          className={[
+            "w-full h-full cursor-grab",
+            "flex items-center justify-center",
+            "transition-all duration-150 ease-in-out",
+            "rounded-l-xl",
+            isDragging
+              ? "translate-y-0 shadow-inner border-b-[0px]"
+              : "hover:shadow-md hover:border-b-[2px]",
+          ].join(" ")}
+          onPointerDown={(e) => {
+            e.preventDefault();
+            onDrag.start(e);
+            onDragStart();
+          }}
+        >
+          <GripVertical className="text-stone-400" size="30" />
+        </div>
+      )}
+
+      <div
+        className={
+          "flex justify-between items-center py-6" + (isOpen ? " pl-4" : "")
+        }
+        onClick={onClick}
+      >
+        <div className="font-bold ml-2">{rule.name}</div>
+
+        <div className="flex gap-4 items-center">
+          <Switch className="cursor-pointer" checked={rule.enabled} />
+          <ChevronRight />
+        </div>
       </div>
     </div>
   );

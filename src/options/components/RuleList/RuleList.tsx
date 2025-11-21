@@ -3,8 +3,16 @@ import RuleListRowCard from "./RuleListRowCard";
 import { DEFAULT_RULES } from "@/lib/rules/type";
 import { Download, Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { LayoutGroup, AnimatePresence, motion } from "framer-motion";
+import {
+  LayoutGroup,
+  AnimatePresence,
+  motion,
+  Reorder,
+  useDragControls,
+} from "framer-motion";
 import { useState } from "react";
+
+// TODO: Props の階層が深くなってきているので、Context 化を検討する
 
 interface RuleListProps {
   cfg: RulesConfig;
@@ -14,6 +22,8 @@ const mockCfg: RulesConfig = DEFAULT_RULES;
 
 const RuleList = (props: RuleListProps) => {
   const [selectedRule, setSelectedRule] = useState<Rule | null>(null);
+  const [rules, setRules] = useState<Rule[]>(mockCfg.rules);
+  const [draggingRuleId, setDraggingRuleId] = useState<string | null>(null);
 
   return (
     <section>
@@ -64,7 +74,7 @@ const RuleList = (props: RuleListProps) => {
           // transition={{ layout: { duration: 0.3, ease: "easeInOut" } }}
         >
           <div className="grid grid-cols-1 gap-1">
-            {mockCfg.rules.map((rule, idx) => (
+            {rules.map((rule, idx) => (
               <div
                 key={rule.id}
                 className="
@@ -77,17 +87,24 @@ const RuleList = (props: RuleListProps) => {
               </div>
             ))}
           </div>
-          <div className="grid grid-cols-1 gap-1">
-            {mockCfg.rules.map((rule) => (
-              <div key={rule.id} style={{ minHeight: "74px" }}>
-                <RuleListRowCard
-                  rule={rule}
-                  onClick={() => setSelectedRule(rule)}
-                  isOpen={selectedRule?.id === rule.id}
-                />
-              </div>
+          <Reorder.Group
+            axis="y"
+            values={rules}
+            onReorder={setRules}
+            className="grid grid-cols-1 gap-1"
+          >
+            {rules.map((rule) => (
+              <RuleReorderItem
+                key={rule.id}
+                rule={rule}
+                isOpen={selectedRule?.id === rule.id}
+                onClick={() => setSelectedRule(rule)}
+                isDragging={draggingRuleId === rule.id}
+                onDragStart={() => setDraggingRuleId(rule.id)}
+                onDragEnd={() => setDraggingRuleId(null)}
+              />
             ))}
-          </div>
+          </Reorder.Group>
         </div>
 
         <AnimatePresence>
@@ -104,6 +121,45 @@ const RuleList = (props: RuleListProps) => {
         </AnimatePresence>
       </LayoutGroup>
     </section>
+  );
+};
+
+interface RuleReorderItemProps {
+  rule: Rule;
+  isOpen: boolean;
+  onClick: () => void;
+  isDragging: boolean;
+  onDragStart: () => void;
+  onDragEnd: () => void;
+}
+
+const RuleReorderItem = ({
+  rule,
+  isOpen,
+  isDragging,
+  onClick,
+  onDragStart,
+  onDragEnd,
+}: RuleReorderItemProps) => {
+  const controls = useDragControls();
+
+  return (
+    <Reorder.Item
+      value={rule}
+      dragListener={false}
+      dragControls={controls}
+      style={{ minHeight: "74px" }}
+      onDragEnd={onDragEnd}
+    >
+      <RuleListRowCard
+        rule={rule}
+        onClick={onClick}
+        onDrag={controls}
+        isOpen={isOpen}
+        isDragging={isDragging}
+        onDragStart={onDragStart}
+      />
+    </Reorder.Item>
   );
 };
 
