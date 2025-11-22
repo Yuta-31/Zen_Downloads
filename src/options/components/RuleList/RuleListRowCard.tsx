@@ -60,7 +60,7 @@ const RuleListRowCard = ({
         console.log(`Clicked on rule: ${rule.name}`);
       }}
       className={[
-        "bg-background cursor-pointer gap-0 p-0",
+        "bg-stone-50/100 cursor-pointer gap-0 p-0",
         isCardOpen
           ? "fixed inset-x-4 top-16 z-50 mx-auto max-w-3xl shadow-lg flex flex-col overflow-hidden z-50"
           : "w-full",

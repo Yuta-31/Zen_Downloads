@@ -15,6 +15,7 @@ import { sanitizePath } from "@/lib/sanitize";
 
 import { sendMessage } from "@/lib/message";
 import RuleList from "./components/RuleList/RuleList";
+import { RulePreviewCard } from "./components/Preview";
 
 /** ユーティリティ */
 const clone = <T,>(x: T) => JSON.parse(JSON.stringify(x)) as T;
@@ -205,6 +206,22 @@ const App: React.FC = () => {
       </section>
 
       {/* 右：プレビュー */}
+      <section>
+        <RulePreviewCard
+          testUrl={testUrl}
+          inferredFilename={testFile}
+          matchedRuleName={preview.match?.name}
+          saveTemplate={preview.match?.actions.pathTemplate}
+          finalPath={preview.path}
+          tokensHelp={
+            "{host} {file} {basename} {ext} {yyyy-mm-dd} {path[0]} {path[1..3]} {lower:ext} {sanitize:file} / query.foo"
+          }
+          onTestUrlChange={function (url: string): void {
+            throw new Error("Function not implemented.");
+          }}
+        />
+      </section>
+
       <section>
         <h2>プレビュー</h2>
         <div className="grid" style={{ marginTop: 8 }}>
