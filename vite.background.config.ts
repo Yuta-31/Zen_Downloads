@@ -1,6 +1,6 @@
-import { defineConfig } from "vite";
 import { resolve } from "path";
 import { fileURLToPath } from "url";
+import { defineConfig } from "vite";
 
 export default defineConfig({
   build: {
@@ -19,7 +19,7 @@ export default defineConfig({
   },
   resolve: {
     alias: {
-      "@": fileURLToPath(new URL("./src", import.meta.url))
-    }
-  }
+      "@": fileURLToPath(new URL("./src", import.meta.url)),
+    },
+  },
 });
