@@ -154,11 +154,11 @@ const RuleHeader = ({
         className={"flex justify-between items-center py-6 ms-2"}
         onClick={onClick}
       >
-        <div className="font-bold ml-2">{rule.name}</div>
+        <div className="font-bold ml-2 text-stone-700">{rule.name}</div>
 
         <div className="flex gap-4 items-center">
           <Switch className="cursor-pointer" checked={rule.enabled} />
-          <ChevronRight />
+          <ChevronRight className="text-stone-700" />
         </div>
       </div>
     </div>

@@ -1,21 +1,14 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useState } from "react";
 import ReactDOM from "react-dom/client";
 import "@/index.css";
 
-import {
-  RulesConfigSchema,
-  type RulesConfig,
-  type Rule,
-} from "@/schemas/rules";
+import { RulesConfigSchema, type RulesConfig } from "@/schemas/rules";
 import { DEFAULT_RULES } from "@/lib/rules/type";
 import { readRules, writeRules, importRules } from "@/lib/rules/storage";
-import { buildCtx, inDomain, matchAll } from "@/lib/rules/engine";
-import { expandTemplate } from "@/lib/template";
-import { sanitizePath } from "@/lib/sanitize";
 
 import { sendMessage } from "@/lib/message";
 import RuleList from "./components/RuleList/RuleList";
-import { RulePreviewCard } from "./components/Preview";
+import { RulePreviewCard } from "./components/Preview/Preview";
 
 /** ユーティリティ */
 const clone = <T,>(x: T) => JSON.parse(JSON.stringify(x)) as T;
@@ -27,12 +20,6 @@ const App: React.FC = () => {
     JSON.stringify(DEFAULT_RULES, null, 2)
   );
   const [jsonError, setJsonError] = useState<string>("");
-
-  // プレビュー
-  const [testUrl, setTestUrl] = useState<string>(
-    "https://file-examples.com/storage/fe8f4c5/file-example_DOCX_500kB.docx"
-  );
-  const [testFile, setTestFile] = useState<string>("file-example_500kB.docx");
 
   // 初期ロード
   useEffect(() => {
@@ -51,8 +38,9 @@ const App: React.FC = () => {
       const parsed = RulesConfigSchema.parse(JSON.parse(t));
       setCfg(parsed);
       setJsonError("");
-    } catch (e: any) {
-      setJsonError(String(e.message ?? e));
+    } catch (e) {
+      const message = e instanceof Error ? e.message : String(e);
+      setJsonError(message);
     }
   };
 
@@ -62,8 +50,9 @@ const App: React.FC = () => {
       const parsed = RulesConfigSchema.parse(JSON.parse(jsonText));
       await writeRules(parsed);
       alert("保存しました");
-    } catch (e: any) {
-      alert("保存できません（JSON or スキーマ不正）\n" + (e.message ?? e));
+    } catch (e) {
+      const message = e instanceof Error ? e.message : String(e);
+      alert("保存できません（JSON or スキーマ不正）\n" + message);
     }
   };
 
@@ -105,27 +94,6 @@ const App: React.FC = () => {
     setJsonText(JSON.stringify(next, null, 2));
   };
 
-  // プレビュー
-  const preview = useMemo(() => {
-    try {
-      const ctx = buildCtx(testUrl, testFile);
-      const enabled = cfg.rules.filter((r) => r.enabled);
-      const matched = enabled.find(
-        (r) => inDomain(r.domains, ctx.host) && matchAll(r.conditions, ctx)
-      );
-      if (!matched)
-        return { match: undefined as Rule | undefined, path: "(既定の保存先)" };
-
-      const out = expandTemplate(
-        matched.actions.pathTemplate ?? "{host}/{file}",
-        ctx
-      );
-      return { match: matched, path: sanitizePath(out) };
-    } catch {
-      return { match: undefined, path: "(URLが不正)" };
-    }
-  }, [cfg, testUrl, testFile]);
-
   // インポート/エクスポート
   const onExport = async () => {
     const text = JSON.stringify(cfg, null, 2);
@@ -150,8 +118,9 @@ const App: React.FC = () => {
       setJsonText(JSON.stringify(reloaded, null, 2));
       setJsonError("");
       alert("インポート完了");
-    } catch (e: any) {
-      alert("インポート失敗: " + (e.message ?? e));
+    } catch (e) {
+      const message = e instanceof Error ? e.message : String(e);
+      alert("インポート失敗: " + message);
     }
   };
 
@@ -207,70 +176,7 @@ const App: React.FC = () => {
 
       {/* 右：プレビュー */}
       <section>
-        <RulePreviewCard
-          testUrl={testUrl}
-          inferredFilename={testFile}
-          matchedRuleName={preview.match?.name}
-          saveTemplate={preview.match?.actions.pathTemplate}
-          finalPath={preview.path}
-          tokensHelp={
-            "{host} {file} {basename} {ext} {yyyy-mm-dd} {path[0]} {path[1..3]} {lower:ext} {sanitize:file} / query.foo"
-          }
-          onTestUrlChange={function (url: string): void {
-            throw new Error("Function not implemented.");
-          }}
-        />
-      </section>
-
-      <section>
-        <h2>プレビュー</h2>
-        <div className="grid" style={{ marginTop: 8 }}>
-          <label>
-            テストURL
-            <input
-              value={testUrl}
-              onChange={(e) => setTestUrl(e.target.value)}
-              style={{ width: "100%" }}
-            />
-          </label>
-          <label>
-            推定ファイル名（空ならURL末尾）
-            <input
-              value={testFile}
-              onChange={(e) => setTestFile(e.target.value)}
-              style={{ width: "100%" }}
-            />
-          </label>
-        </div>
-
-        <div className="card" style={{ marginTop: 12 }}>
-          <div className="muted">マッチしたルール</div>
-          {preview.match ? (
-            <>
-              <div>
-                <b>{preview.match.name}</b>
-              </div>
-              <div className="muted" style={{ fontSize: 12 }}>
-                {preview.match.actions.pathTemplate}
-              </div>
-            </>
-          ) : (
-            <div className="muted">（マッチなし → 既定の保存ルールが適用）</div>
-          )}
-
-          <div style={{ marginTop: 12 }} className="muted">
-            最終パス
-          </div>
-          <code className="code">{preview.path}</code>
-
-          <div style={{ marginTop: 8, fontSize: 12 }} className="muted">
-            使えるトークン例:{" "}
-            {
-              "{host} {file} {basename} {ext} {yyyy-mm-dd} {path[0]} {path[1..3]} {lower:ext} {sanitize:file}"
-            }{" "}
-            / {"query.foo"}
-          </div>
-        </div>
+        <RulePreviewCard cfg={cfg} />
       </section>
     </div>
   );

@@ -1,5 +1,5 @@
 import { buildCtx, inDomain, matchAll } from "@/lib/rules/engine";
-import { expandTemplate } from "@/lib/template";
+import { expandTemplate } from "@/lib/rules/template";
 import { getRulesSnapshot, initRulesCache } from "@/lib/rules/cache";
 import { attachMessageListeners } from "./message";
 
