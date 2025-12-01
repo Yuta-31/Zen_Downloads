@@ -1,3 +1,4 @@
+import { Link2, FileText, Wand2, FolderOutput } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -7,7 +8,6 @@ import {
   AccordionTrigger,
   AccordionContent,
 } from "@/components/ui/accordion";
-import { Link2, FileText, Wand2, FolderOutput } from "lucide-react";
 
 type PreviewProps = {
   /** user-editable */

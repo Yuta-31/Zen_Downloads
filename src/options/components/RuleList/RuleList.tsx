@@ -1,8 +1,4 @@
-import type { Rule, RulesConfig } from "@/schemas/rules";
-import RuleListRowCard from "./RuleListRowCard";
-import { DEFAULT_RULES } from "@/lib/rules/type";
 import { Download, Upload } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import {
   LayoutGroup,
   AnimatePresence,
@@ -11,6 +7,10 @@ import {
   useDragControls,
 } from "framer-motion";
 import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { DEFAULT_RULES } from "@/lib/rules/type";
+import RuleListRowCard from "./RuleListRowCard";
+import type { Rule, RulesConfig } from "@/schemas/rules";
 
 // TODO: Props の階層が深くなってきているので、Context 化を検討する
 

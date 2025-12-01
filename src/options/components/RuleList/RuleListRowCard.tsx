@@ -1,10 +1,10 @@
-import { Card } from "@/components/ui/card";
-import type { Rule } from "@/schemas/rules";
-import { Switch } from "@/components/ui/switch";
 import { ChevronRight } from "lucide-react";
 import { DragControls, motion } from "framer-motion";
-import { useEffect, useState } from "react";
 import { GripVertical } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Switch } from "@/components/ui/switch";
+import { Card } from "@/components/ui/card";
+import type { Rule } from "@/schemas/rules";
 
 const MotionCard = motion(Card);
 
