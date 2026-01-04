@@ -128,49 +128,6 @@ const App: React.FC = () => {
     <div className="container">
       {/* 左：JSONエディタ */}
       <section>
-        <h1>Rules (JSON)</h1>
-        <p className="muted">
-          上から順に評価し、最初にマッチしたルールを適用します。保存時に Zod
-          で検証されます。
-        </p>
-
-        <textarea
-          value={jsonText}
-          onChange={(e) => onJsonChange(e.target.value)}
-        />
-
-        {jsonError ? (
-          <pre className="err">{jsonError}</pre>
-        ) : (
-          <div className="ok">✓ スキーマ検証 OK</div>
-        )}
-
-        <div className="row" style={{ marginTop: 8 }}>
-          <button onClick={save}>保存</button>
-          <button
-            onClick={() => {
-              setCfg(DEFAULT_RULES);
-              setJsonText(JSON.stringify(DEFAULT_RULES, null, 2));
-              setJsonError("");
-            }}
-          >
-            デフォルトに戻す
-          </button>
-          <span className="right" />
-          <button onClick={onExport}>エクスポート</button>
-          <label className="row" style={{ gap: 6 }}>
-            <input
-              type="file"
-              accept="application/json"
-              onChange={(e) =>
-                e.currentTarget.files?.[0] &&
-                onImportFile(e.currentTarget.files[0])
-              }
-            />
-          </label>
-        </div>
-
-        {/* ルール軽操作 */}
         <RuleList cfg={cfg} />
       </section>
 

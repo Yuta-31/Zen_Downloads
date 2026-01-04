@@ -7,9 +7,9 @@ import {
   useDragControls,
 } from "framer-motion";
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
 import { DEFAULT_RULES } from "@/lib/rules/type";
 import RuleListRowCard from "./RuleListRowCard";
+import HoverExpandButton from "./HoverExpandButton";
 import type { Rule, RulesConfig } from "@/schemas/rules";
 
 // TODO: Props の階層が深くなってきているので、Context 化を検討する
@@ -29,42 +29,9 @@ const RuleList = ({ cfg }: RuleListProps) => {
     <section>
       <div className="w-full flex items-center justify-between px-2 h-12">
         <div className="text-2xl font-bold">Rule List</div>
-        <div className="flex">
-          <Button variant="outline" className="cursor-pointer group gap-0">
-            <Download />
-            <span
-              className="
-                ml-0
-                max-w-0
-                opacity-0
-                whitespace-nowrap
-                transition-all duration-300 ease-in
-                overflow-hidden
-                group-hover:ml-2
-                group-hover:max-w-[80px]
-                group-hover:opacity-100"
-            >
-              Download
-            </span>
-          </Button>
-
-          <Button variant="outline" className="cursor-pointer group gap-0 ml-2">
-            <Upload />
-            <span
-              className="
-                ml-0
-                max-w-0
-                opacity-0
-                whitespace-nowrap
-                transition-all duration-300 ease-in
-                overflow-hidden
-                group-hover:ml-2
-                group-hover:max-w-[80px]
-                group-hover:opacity-100"
-            >
-              Upload
-            </span>
-          </Button>
+        <div className="flex gap-2">
+          <HoverExpandButton icon={<Download />} text="Download" />
+          <HoverExpandButton icon={<Upload />} text="Upload" />
         </div>
       </div>
       <LayoutGroup>

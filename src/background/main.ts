@@ -1,4 +1,4 @@
-import { buildCtx, inDomain, matchAll } from "@/lib/rules/engine";
+import { buildCtx, isInDomain, matchAll } from "@/lib/rules/engine";
 import { expandTemplate } from "@/lib/rules/template";
 import { getRulesSnapshot, initRulesCache } from "@/lib/rules/cache";
 import { attachMessageListeners } from "./message";
@@ -22,7 +22,7 @@ const handler = (
     if (!cfg) return;
     const enabled = cfg.rules.filter((r) => r.enabled);
     const rule = enabled.find(
-      (r) => inDomain(r.domains, ctx.host) && matchAll(r.conditions, ctx)
+      (r) => isInDomain(r.domains, ctx.host) && matchAll(r.conditions, ctx)
     );
 
     if (rule) {
