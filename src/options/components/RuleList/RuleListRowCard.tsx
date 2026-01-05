@@ -1,9 +1,11 @@
-import { ChevronRight } from "lucide-react";
+import { ChevronRight, Trash2 } from "lucide-react";
 import { DragControls, motion } from "framer-motion";
 import { GripVertical } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Switch } from "@/components/ui/switch";
 import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { useRulesDispatch } from "@/options/hooks/useRules";
 import type { Rule } from "@/schemas/rules";
 
 const MotionCard = motion(Card);
@@ -109,6 +111,7 @@ const RuleHeader = ({
   onDragStart,
   onDragEnd,
 }: RuleHeaderProps) => {
+  const { toggleEnable } = useRulesDispatch();
   return (
     <div
       className={[
@@ -157,7 +160,16 @@ const RuleHeader = ({
         <div className="font-bold ml-2 text-stone-700">{rule.name}</div>
 
         <div className="flex gap-4 items-center">
-          <Switch className="cursor-pointer" checked={rule.enabled} />
+          <Switch
+            className="cursor-pointer"
+            checked={rule.enabled}
+            onCheckedChange={() => {
+              toggleEnable(rule.id);
+            }}
+            onClick={(e) => {
+              e.stopPropagation();
+            }}
+          />
           <ChevronRight className="text-stone-700" />
         </div>
       </div>
@@ -170,13 +182,52 @@ interface RuleDetailsProps {
 }
 
 const RuleDetails = ({ rule }: RuleDetailsProps) => {
+  const { removeRule } = useRulesDispatch();
   return (
-    <div className="p-4">
-      <div className="mb-2 font-semibold">Rule Details</div>
-      <div>ID: {rule.id}</div>
-      <div>Name: {rule.name}</div>
-      <div>Enabled: {rule.enabled ? "Yes" : "No"}</div>
-      {/* Add more rule details as needed */}
+    <div className="p-6 space-y-4">
+      <div className="flex justify-between items-start">
+        <div>
+          <div className="text-lg font-semibold text-stone-800 mb-4">
+            {rule.name}
+          </div>
+          <div className="space-y-2 text-sm text-stone-600">
+            <div>
+              <span className="font-semibold">ID:</span> {rule.id}
+            </div>
+            <div>
+              <span className="font-semibold">状態:</span>{" "}
+              {rule.enabled ? "有効" : "無効"}
+            </div>
+            <div>
+              <span className="font-semibold">ドメイン:</span>{" "}
+              {rule.domains.join(", ")}
+            </div>
+            <div>
+              <span className="font-semibold">保存先:</span>{" "}
+              {rule.actions.pathTemplate}
+            </div>
+            {rule.conditions && rule.conditions.length > 0 && (
+              <div>
+                <span className="font-semibold">条件:</span>{" "}
+                {rule.conditions.length}件
+              </div>
+            )}
+          </div>
+        </div>
+        <Button
+          variant="destructive"
+          size="sm"
+          onClick={(e) => {
+            e.stopPropagation();
+            if (confirm(`ルール「${rule.name}」を削除しますか？`)) {
+              removeRule(rule.id);
+            }
+          }}
+        >
+          <Trash2 className="h-4 w-4 mr-1" />
+          削除
+        </Button>
+      </div>
     </div>
   );
 };

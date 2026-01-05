@@ -1,6 +1,6 @@
 import { RulesConfigSchema, type RulesConfig } from "../../schemas/rules";
 
-export const DEFAULT_RULES: RulesConfig = {
+const DEFAULT_RULES: RulesConfig = {
   version: 1,
   rules: [
     {

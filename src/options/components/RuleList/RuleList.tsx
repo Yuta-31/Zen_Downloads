@@ -1,4 +1,4 @@
-import { Download, Upload } from "lucide-react";
+import { Download, Plus, Upload } from "lucide-react";
 import {
   LayoutGroup,
   AnimatePresence,
@@ -7,31 +7,61 @@ import {
   useDragControls,
 } from "framer-motion";
 import { useState } from "react";
-import { DEFAULT_RULES } from "@/lib/rules/type";
+import { downloadJson, pickFileAsJson } from "@/options/lib/file";
+import { useRules, useRulesDispatch } from "@/options/hooks/useRules";
 import RuleListRowCard from "./RuleListRowCard";
 import HoverExpandButton from "./HoverExpandButton";
-import type { Rule, RulesConfig } from "@/schemas/rules";
+import type { Rule } from "@/schemas/rules";
 
-// TODO: Props の階層が深くなってきているので、Context 化を検討する
-
-interface RuleListProps {
-  cfg: RulesConfig;
-}
-
-const mockCfg: RulesConfig = DEFAULT_RULES;
-
-const RuleList = ({ cfg }: RuleListProps) => {
+const RuleList = () => {
+  const { rules } = useRules();
+  const { exportToJson, importFromJson, setRules, addRule } =
+    useRulesDispatch();
   const [selectedRule, setSelectedRule] = useState<Rule | null>(null);
-  const [rules, setRules] = useState<Rule[]>(mockCfg.rules);
   const [draggingRuleId, setDraggingRuleId] = useState<string | null>(null);
+
+  const handleReorder = (newRules: Rule[]) => {
+    setRules(newRules);
+  };
+
+  const handleDragEnd = () => {
+    setDraggingRuleId(null);
+  };
+
+  const handleDownload = async () => {
+    const cfg = await exportToJson();
+    downloadJson(cfg, "download-helper-rules.json");
+  };
+
+  const handleUpload = async () => {
+    const file = await pickFileAsJson();
+    if (!file) return;
+    const text = await file.text();
+    const json = JSON.parse(text);
+    await importFromJson(json);
+  };
 
   return (
     <section>
       <div className="w-full flex items-center justify-between px-2 h-12">
         <div className="text-2xl font-bold">Rule List</div>
         <div className="flex gap-2">
-          <HoverExpandButton icon={<Download />} text="Download" />
-          <HoverExpandButton icon={<Upload />} text="Upload" />
+          <HoverExpandButton
+            icon={<Plus />}
+            onClick={addRule}
+            text="Add"
+            variant="default"
+          />
+          <HoverExpandButton
+            icon={<Download />}
+            onClick={handleDownload}
+            text="Download"
+          />
+          <HoverExpandButton
+            icon={<Upload />}
+            onClick={handleUpload}
+            text="Upload"
+          />
         </div>
       </div>
       <LayoutGroup>
@@ -57,7 +87,7 @@ const RuleList = ({ cfg }: RuleListProps) => {
           <Reorder.Group
             axis="y"
             values={rules}
-            onReorder={setRules}
+            onReorder={handleReorder}
             className="grid grid-cols-1 gap-1"
           >
             {rules.map((rule) => (
@@ -68,10 +98,7 @@ const RuleList = ({ cfg }: RuleListProps) => {
                 onClick={() => setSelectedRule(rule)}
                 isDragging={draggingRuleId === rule.id}
                 onDragStart={() => setDraggingRuleId(rule.id)}
-                onDragEnd={() => {
-                  setDraggingRuleId(null);
-                  // TODO: Save order to config
-                }}
+                onDragEnd={handleDragEnd}
               />
             ))}
           </Reorder.Group>

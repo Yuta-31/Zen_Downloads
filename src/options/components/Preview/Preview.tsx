@@ -16,22 +16,20 @@ import {
   type EvalCtx,
 } from "@/lib/rules/engine";
 import { expandTemplate } from "@/lib/rules/template";
-import type { Rule, RulesConfig } from "@/schemas/rules";
-
-type PreviewProps = {
-  cfg: RulesConfig;
-};
+import { useRules } from "@/options/hooks/useRules";
+import type { Rule } from "@/schemas/rules";
 
 const tokensHelp =
   "{host} {file} {basename} {ext} {yyyy-mm-dd} {path[0]} {path[1..3]} {lower:ext} {sanitize:file} / query.foo";
 
-export const RulePreviewCard = ({ cfg }: PreviewProps) => {
+export const RulePreviewCard = () => {
   const [testUrl, setTestUrl] = useState(
     "https://file-examples.com/storage/fe8f4c5/file-example_DOCX_500kB.docx"
   );
   const [previewCtx, setPreviewCtx] = useState<EvalCtx | null>(null);
   const [matchedRule, setMatchedRule] = useState<Rule | null>(null);
   const [savePath, setSavePath] = useState<string | null>(null);
+  const { rules } = useRules();
 
   return (
     <Accordion type="single" collapsible defaultValue="preview">
@@ -60,7 +58,7 @@ export const RulePreviewCard = ({ cfg }: PreviewProps) => {
                       value={testUrl}
                       onChange={(e) => {
                         const _ctx = buildCtx(e.target.value);
-                        const _matchedRule = cfg.rules
+                        const _matchedRule = rules
                           .filter((rule) => rule.enabled)
                           .find(
                             (rule) =>

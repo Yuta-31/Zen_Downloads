@@ -3,11 +3,28 @@ import { Button } from "@/components/ui/button";
 interface DownloadProps {
   icon: React.ReactNode;
   text: string;
+  onClick?: () => void;
+  variant?:
+    | "default"
+    | "link"
+    | "outline"
+    | "destructive"
+    | "secondary"
+    | "ghost";
 }
 
-const HoverExpandButton = ({ icon, text }: DownloadProps) => {
+const HoverExpandButton = ({
+  icon,
+  text,
+  onClick,
+  variant = "outline",
+}: DownloadProps) => {
   return (
-    <Button variant="outline" className="cursor-pointer group gap-0">
+    <Button
+      variant={variant}
+      onClick={onClick}
+      className="cursor-pointer group gap-0"
+    >
       {icon}
       <span
         className="

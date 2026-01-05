@@ -1,6 +1,6 @@
 import { buildCtx, isInDomain, matchAll } from "@/lib/rules/engine";
 import { expandTemplate } from "@/lib/rules/template";
-import { getRulesSnapshot, initRulesCache } from "@/lib/rules/cache";
+import { getRulesSnapshot, initRulesCache } from "@/background/lib/cache";
 import { attachMessageListeners } from "./message";
 
 attachMessageListeners();
@@ -18,9 +18,9 @@ const handler = (
 
     const urlStr = item.finalUrl || item.url;
     const ctx = buildCtx(urlStr, item.filename);
-    const cfg = getRulesSnapshot();
-    if (!cfg) return;
-    const enabled = cfg.rules.filter((r) => r.enabled);
+    const rules = getRulesSnapshot();
+    if (!rules) return;
+    const enabled = rules.filter((r) => r.enabled);
     const rule = enabled.find(
       (r) => isInDomain(r.domains, ctx.host) && matchAll(r.conditions, ctx)
     );
