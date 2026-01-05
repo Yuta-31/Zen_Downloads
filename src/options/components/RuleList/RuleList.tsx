@@ -1,11 +1,5 @@
 import { Download, Plus, Upload } from "lucide-react";
-import {
-  LayoutGroup,
-  AnimatePresence,
-  motion,
-  Reorder,
-  useDragControls,
-} from "framer-motion";
+import { LayoutGroup, Reorder, useDragControls } from "framer-motion";
 import { useState } from "react";
 import { downloadJson, pickFileAsJson } from "@/options/lib/file";
 import { useRules, useRulesDispatch } from "@/options/hooks/useRules";
@@ -26,6 +20,14 @@ const RuleList = () => {
 
   const handleDragEnd = () => {
     setDraggingRuleId(null);
+  };
+
+  const handleRuleClick = (rule: Rule) => {
+    if (selectedRule?.id === rule.id) {
+      setSelectedRule(null);
+    } else {
+      setSelectedRule(rule);
+    }
   };
 
   const handleDownload = async () => {
@@ -67,23 +69,9 @@ const RuleList = () => {
       <LayoutGroup>
         <div
           // layout
-          className="pt-4 pb-4 pr-4 pl-0 rounded-md shadow-inner bg-stone-200 grid grid-cols-[35px_1fr] gap-1"
+          className="p-4 rounded-md shadow-inner bg-stone-200 grid grid-cols-1 gap-1"
           // transition={{ layout: { duration: 0.3, ease: "easeInOut" } }}
         >
-          <div className="grid grid-cols-1 gap-1">
-            {rules.map((rule, idx) => (
-              <div
-                key={rule.id}
-                className="
-                  flex items-center justify-center 
-                  text-[25px] font-bold 
-                  text-transparent bg-stone-600 bg-clip-text [text-shadow:1px_1px_2px_rgba(231,229,228,0.95)]"
-                style={{ minHeight: "74px" }}
-              >
-                {idx + 1}
-              </div>
-            ))}
-          </div>
           <Reorder.Group
             axis="y"
             values={rules}
@@ -95,27 +83,15 @@ const RuleList = () => {
                 key={rule.id}
                 rule={rule}
                 isOpen={selectedRule?.id === rule.id}
-                onClick={() => setSelectedRule(rule)}
+                onClick={() => handleRuleClick(rule)}
                 isDragging={draggingRuleId === rule.id}
                 onDragStart={() => setDraggingRuleId(rule.id)}
                 onDragEnd={handleDragEnd}
+                isDragDisabled={selectedRule !== null}
               />
             ))}
           </Reorder.Group>
         </div>
-
-        <AnimatePresence>
-          {selectedRule && (
-            <motion.div
-              className="fixed inset-0 z-40 bg-black/40"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.6 }}
-              onClick={() => setSelectedRule(null)}
-            />
-          )}
-        </AnimatePresence>
       </LayoutGroup>
     </section>
   );
@@ -128,6 +104,7 @@ interface RuleReorderItemProps {
   isDragging: boolean;
   onDragStart: () => void;
   onDragEnd: () => void;
+  isDragDisabled: boolean;
 }
 
 const RuleReorderItem = ({
@@ -137,6 +114,7 @@ const RuleReorderItem = ({
   onClick,
   onDragStart,
   onDragEnd,
+  isDragDisabled,
 }: RuleReorderItemProps) => {
   const controls = useDragControls();
 
@@ -156,6 +134,7 @@ const RuleReorderItem = ({
         isDragging={isDragging}
         onDragStart={onDragStart}
         onDragEnd={onDragEnd}
+        isDragDisabled={isDragDisabled}
       />
     </Reorder.Item>
   );

@@ -17,6 +17,7 @@ export interface RulesDispatchContextType {
   setRules: React.Dispatch<React.SetStateAction<Rule[]>>;
   toggleEnable: (id: string) => Promise<void>;
   addRule: () => Promise<void>;
+  updateRule: (id: string, updatedRule: Partial<Rule>) => Promise<void>;
   removeRule: (id: string) => Promise<void>;
   reorderRules: (rules: Rule[]) => Promise<void>;
   exportToJson: () => Promise<Rule[]>;
@@ -83,6 +84,18 @@ export const RulesProvider: React.FC<RulesProviderProps> = ({ children }) => {
     setRules(next);
   };
 
+  // update rule
+  const updateRule = async (id: string, updatedRule: Partial<Rule>) => {
+    const next = clone(rules);
+    const index = next.findIndex((r) => r.id === id);
+    if (index === -1) {
+      console.error(`Rule with id ${id} not found`);
+      return;
+    }
+    next[index] = { ...next[index], ...updatedRule };
+    setRules(next);
+  };
+
   // delete rule
   const removeRule = async (id: string) => {
     const next = clone(rules);
@@ -114,6 +127,7 @@ export const RulesProvider: React.FC<RulesProviderProps> = ({ children }) => {
     setRules,
     toggleEnable,
     addRule,
+    updateRule,
     removeRule,
     reorderRules,
     exportToJson,
