@@ -19,8 +19,36 @@ import { expandTemplate } from "@/lib/rules/template";
 import { useRules } from "@/options/hooks/useRules";
 import type { Rule } from "@/schemas/rules";
 
-const tokensHelp =
-  "{host} {file} {basename} {ext} {yyyy-mm-dd} {path[0]} {path[1..3]} {lower:ext} {sanitize:file} / query.foo";
+const tokenCategories = [
+  {
+    title: "Basic",
+    tokens: [
+      { token: "{host}", desc: "Domain name (e.g., example.com)" },
+      { token: "{file}", desc: "Full filename with extension" },
+      { token: "{basename}", desc: "Filename without extension" },
+      { token: "{ext}", desc: "File extension (e.g., pdf)" },
+    ],
+  },
+  {
+    title: "Date & Time",
+    tokens: [
+      { token: "{yyyy-mm-dd}", desc: "Current date (e.g., 2026-01-06)" },
+      { token: "{yyyy}", desc: "Year (e.g., 2026)" },
+      { token: "{mm}", desc: "Month (e.g., 01)" },
+      { token: "{dd}", desc: "Day (e.g., 06)" },
+    ],
+  },
+  {
+    title: "URL Parts",
+    tokens: [
+      { token: "{path[0]}", desc: "First path segment" },
+      { token: "{path[1]}", desc: "Second path segment" },
+      { token: "{query.foo}", desc: "Query parameter value (foo)" },
+      { token: "{referrer.host}", desc: "Referrer domain" },
+      { token: "{referrer.query.bar}", desc: "Referrer query parameter (bar)" },
+    ],
+  },
+];
 
 export const RulePreviewCard = () => {
   const [testUrl, setTestUrl] = useState(
@@ -146,20 +174,43 @@ export const RulePreviewCard = () => {
               </section>
 
               {/* Section D: Tokens help */}
-              {tokensHelp && (
-                <Accordion type="single" collapsible className="pt-1">
-                  <AccordionItem value="tokens">
-                    <AccordionTrigger className="text-xs text-stone-600">
-                      Available tokens
-                    </AccordionTrigger>
-                    <AccordionContent>
-                      <div className="rounded-md bg-stone-100 border border-stone-200 px-3 py-2 font-mono text-xs text-stone-800 whitespace-pre-wrap">
-                        {tokensHelp}
+              <Accordion type="single" collapsible className="pt-1">
+                <AccordionItem value="tokens">
+                  <AccordionTrigger className="text-xs text-stone-600">
+                    Available tokens
+                  </AccordionTrigger>
+                  <AccordionContent>
+                    <div className="space-y-3">
+                      <div className="text-xs text-stone-600 bg-stone-50 border border-stone-200 rounded px-2 py-1.5">
+                        💡 All tokens are automatically sanitized to remove
+                        invalid filename characters.
                       </div>
-                    </AccordionContent>
-                  </AccordionItem>
-                </Accordion>
-              )}
+                      {tokenCategories.map((category) => (
+                        <div key={category.title}>
+                          <div className="text-[11px] font-semibold text-stone-500 mb-1.5">
+                            {category.title}
+                          </div>
+                          <div className="space-y-1">
+                            {category.tokens.map((item) => (
+                              <div
+                                key={item.token}
+                                className="flex items-baseline gap-2"
+                              >
+                                <code className="text-xs font-mono text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded">
+                                  {item.token}
+                                </code>
+                                <span className="text-xs text-stone-600">
+                                  {item.desc}
+                                </span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </AccordionContent>
+                </AccordionItem>
+              </Accordion>
             </CardContent>
           </AccordionContent>
         </Card>
