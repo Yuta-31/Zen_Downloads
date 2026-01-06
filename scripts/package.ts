@@ -36,6 +36,19 @@ async function packageExtension(): Promise<void> {
       console.log(`Removed existing ${zipFileName}`);
     }
 
+    // Copy license files to dist directory
+    const licenseFiles = ["LICENSE", "THIRD-PARTY-NOTICES.md"];
+    licenseFiles.forEach((file) => {
+      const srcPath = path.join(rootDir, file);
+      const destPath = path.join(distDir, file);
+      if (fs.existsSync(srcPath)) {
+        fs.copyFileSync(srcPath, destPath);
+        console.log(`✓ Copied ${file} to dist`);
+      } else {
+        console.warn(`⚠ ${file} not found, skipping...`);
+      }
+    });
+
     // create ZIP using PowerShell Compress-Archive
     const command = `Compress-Archive -Path "${distDir}\\*" -DestinationPath "${zipFilePath}" -Force`;
     execSync(command, { stdio: "inherit", shell: "powershell.exe" });

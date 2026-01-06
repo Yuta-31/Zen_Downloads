@@ -24,3 +24,6 @@ dist-ssr
 *.sw?
 
 appPackages
+
+# License files (auto-generated)
+THIRD-PARTY-LICENSES.json
