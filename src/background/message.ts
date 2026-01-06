@@ -27,25 +27,5 @@ export const attachMessageListeners = () => {
     }
   );
   registerHandler("ping", async () => ({ ok: true }));
-
-  // Log message handler
-  registerHandler("log", async (msg) => {
-    const { level, args } = msg;
-    // Content logs use [CDP: CT] prefix only (not [CDP: BG])
-    const contentArgs = ["[CDP: CT]", ...args];
-    switch (level) {
-      case "info":
-        console.log(...contentArgs);
-        break;
-      case "warn":
-        console.warn(...contentArgs);
-        break;
-      case "error":
-        console.error(...contentArgs);
-        break;
-    }
-    return { ok: true };
-  });
-
   attachMessageListener();
 };

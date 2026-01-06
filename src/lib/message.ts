@@ -8,13 +8,11 @@ export type MsgLog = {
   args: unknown[];
 };
 
-const messageMap = {
-  "export-rules": {} as MsgExportRules,
-  ping: undefined,
-  log: {} as MsgLog,
+type MessageMap = {
+  "export-rules": MsgExportRules;
+  ping: undefined;
+  log: MsgLog;
 };
-
-type MessageMap = typeof messageMap;
 
 type MsgCommand = keyof MessageMap;
 type MsgPayload = MessageMap[MsgCommand];
@@ -50,7 +48,8 @@ export const registerHandler = <C extends MsgCommand, R = unknown>(
 };
 
 export const attachMessageListener = () => {
-  if ((globalThis as any).__APP_MSG_ATTACHED__) return;
+  if ((globalThis as { __APP_MSG_ATTACHED__?: boolean }).__APP_MSG_ATTACHED__)
+    return;
   chrome.runtime.onMessage.addListener(
     (msg: AppMessage, sender, sendResponse) => {
       (async () => {
@@ -63,14 +62,18 @@ export const attachMessageListener = () => {
             });
           const res = await route(msg.payload, sender);
           sendResponse(res ?? { ok: true });
-        } catch (e: any) {
-          sendResponse({ ok: false, error: String(e?.message ?? e) });
+        } catch (e) {
+          sendResponse({
+            ok: false,
+            error: String(e instanceof Error ? e.message : e),
+          });
         }
       })();
       return true;
     }
   );
-  (globalThis as any).__APP_MSG_ATTACHED__ = true;
+  (globalThis as { __APP_MSG_ATTACHED__?: boolean }).__APP_MSG_ATTACHED__ =
+    true;
 };
 
 export const sendMessage = async <R = unknown>(
@@ -89,7 +92,7 @@ export const sendMessage = async <R = unknown>(
       return { ok: false, error: "Invalid response" };
     }
     return res;
-  } catch (e: any) {
-    return { ok: false, error: String(e?.message ?? e) };
+  } catch (e) {
+    return { ok: false, error: String(e instanceof Error ? e.message : e) };
   }
 };
