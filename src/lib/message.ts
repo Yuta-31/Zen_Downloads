@@ -3,9 +3,15 @@ export type MsgExportRules = {
   json: string;
 };
 
+export type MsgLog = {
+  level: "info" | "warn" | "error";
+  args: unknown[];
+};
+
 const messageMap = {
   "export-rules": {} as MsgExportRules,
   ping: undefined,
+  log: {} as MsgLog,
 };
 
 type MessageMap = typeof messageMap;

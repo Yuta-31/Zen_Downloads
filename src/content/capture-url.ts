@@ -1,6 +1,8 @@
 // Send current page URL to background when download link is clicked
 // This allows query parameters to be captured even if referrer doesn't include them
 
+import { logger } from "./logger";
+
 let lastClickedUrl = window.location.href;
 let lastClickTime = 0;
 
@@ -23,6 +25,8 @@ document.addEventListener(
       if (hasDownloadAttr || isFileLink) {
         lastClickedUrl = window.location.href;
         lastClickTime = Date.now();
+
+        logger.info("Download link detected:", url);
 
         // Send page URL to background
         chrome.runtime.sendMessage({

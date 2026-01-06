@@ -2,9 +2,10 @@ import { buildCtx, isInDomain, matchAll } from "@/lib/rules/engine";
 import { expandTemplate } from "@/lib/rules/template";
 import { getRulesSnapshot, initRulesCache } from "@/background/lib/cache";
 import { attachMessageListeners } from "./message";
+import { logger } from "@/background/lib/logger";
 
 attachMessageListeners();
-initRulesCache().catch(console.error);
+initRulesCache().catch((err) => logger.error("Init rules cache failed:", err));
 const processed = new Set<number>();
 
 const handler = (
@@ -27,8 +28,8 @@ const processDownload = async (
 
     const urlStr = item.finalUrl || item.url;
 
-    console.log(urlStr);
-    console.log(item);
+    logger.info("Download URL:", urlStr);
+    logger.info("Download item:", item);
 
     // Get active tab URL
     let pageUrl: string | undefined;
@@ -41,10 +42,10 @@ const processDownload = async (
       if (tabs[0]?.url) {
         pageUrl = tabs[0].url;
         urlSource = "active tab";
-        console.log("Got URL from active tab:", pageUrl);
+        logger.info("Got URL from active tab:", pageUrl);
       }
     } catch (e) {
-      console.warn("Failed to get active tab URL:", e);
+      logger.warn("Failed to get active tab URL:", e);
     }
 
     // Use pageUrl if available, otherwise use referrer
@@ -52,12 +53,12 @@ const processDownload = async (
     if (!pageUrl && item.referrer) {
       urlSource = "referrer header";
     }
-    console.log(`[URL Source: ${urlSource}] Using referrer:`, referrer);
+    logger.info(`[URL Source: ${urlSource}] Using referrer:`, referrer);
     const ctx = buildCtx(urlStr, item.filename, referrer);
 
-    console.log("=== Domain Info ===");
-    console.log("Download URL domain:", ctx.host);
-    console.log("Referrer domain:", ctx.referrerHost || "(none)");
+    logger.info("=== Domain Info ===");
+    logger.info("Download URL domain:", ctx.host);
+    logger.info("Referrer domain:", ctx.referrerHost || "(none)");
 
     const rules = getRulesSnapshot();
     if (!rules) return;
@@ -69,11 +70,11 @@ const processDownload = async (
     );
 
     if (rule) {
-      console.log("=== Matched Rule ===");
-      console.log("Rule name:", rule.name);
-      console.log("Rule ID:", rule.id);
-      console.log("Rule domains:", rule.domains.join(", "));
-      console.log("Path template:", rule.actions.pathTemplate);
+      logger.info("=== Matched Rule ===");
+      logger.info("Rule name:", rule.name);
+      logger.info("Rule ID:", rule.id);
+      logger.info("Rule domains:", rule.domains.join(", "));
+      logger.info("Path template:", rule.actions.pathTemplate);
 
       const tpl = rule.actions.pathTemplate ?? "{host}/{file}";
       let newPath = expandTemplate(tpl, ctx);
@@ -81,25 +82,25 @@ const processDownload = async (
       // Normalize path: convert backslashes to forward slashes
       newPath = newPath.replace(/\\/g, "/");
 
-      console.log("Final path:", newPath);
-      console.log("Suggesting filename to Chrome...");
+      logger.info("Final path:", newPath);
+      logger.info("Suggesting filename to Chrome...");
 
       const suggestion: chrome.downloads.FilenameSuggestion = {
         filename: newPath,
         conflictAction: "uniquify",
       };
-      console.log("Suggestion object:", JSON.stringify(suggestion));
+      logger.info("Suggestion object:", JSON.stringify(suggestion));
 
       suggest(suggestion);
 
-      console.log("Suggested successfully");
+      logger.info("Suggested successfully");
       return true; // Important: return true to indicate suggest has been processed
     } else {
-      console.log("=== No Rule Matched ===");
+      logger.info("=== No Rule Matched ===");
     }
     return;
   } catch (e) {
-    console.error("Failed to build filename:", e);
+    logger.error("Failed to build filename:", e);
     return;
   }
 };
