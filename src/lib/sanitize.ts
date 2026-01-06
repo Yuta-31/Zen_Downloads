@@ -38,9 +38,3 @@ export const sanitizeSegment = (name: string): string => {
 
   return s;
 };
-
-export const sanitizePath = (path: string): string => {
-  const parts = path.split("/").filter((p) => p.length > 0);
-  const safe = parts.map(sanitizeSegment);
-  return safe.join("/");
-};
