@@ -170,7 +170,7 @@ const RuleHeader = ({
             className="h-8 w-8"
             onClick={(e) => {
               e.stopPropagation();
-              if (confirm(`ルール「${rule.name}」を削除しますか？`)) {
+              if (confirm(`Delete rule "${rule.name}"?`)) {
                 removeRule(rule.id);
               }
             }}
@@ -255,7 +255,7 @@ const EditableField = ({ value, onSave, label }: EditableFieldProps) => {
         setIsEditing(true);
       }}
       className="cursor-text hover:bg-stone-100 px-2 py-1 rounded transition-colors -ml-2"
-      title={`クリックして${label}を編集`}
+      title={`Click to edit ${label}`}
     >
       {value}
     </div>
@@ -292,7 +292,7 @@ const RuleDetails = ({ rule }: RuleDetailsProps) => {
           <EditableField
             value={rule.name}
             onSave={handleUpdateName}
-            label="ルール名"
+            label="Rule Name"
           />
         </div>
         <div className="space-y-2 text-sm text-stone-600">
@@ -300,29 +300,29 @@ const RuleDetails = ({ rule }: RuleDetailsProps) => {
             <span className="font-semibold">ID:</span> {rule.id}
           </div>
           <div>
-            <span className="font-semibold">状態:</span>{" "}
-            {rule.enabled ? "有効" : "無効"}
+            <span className="font-semibold">Status:</span>{" "}
+            {rule.enabled ? "Enabled" : "Disabled"}
           </div>
           <div className="flex items-start gap-2">
-            <span className="font-semibold whitespace-nowrap">ドメイン:</span>
+            <span className="font-semibold whitespace-nowrap">Domain:</span>
             <EditableField
               value={rule.domains.join(", ")}
               onSave={handleUpdateDomains}
-              label="ドメイン"
+              label="Domain"
             />
           </div>
           <div className="flex items-start gap-2">
-            <span className="font-semibold whitespace-nowrap">保存先:</span>
+            <span className="font-semibold whitespace-nowrap">Save to:</span>
             <EditableField
               value={rule.actions.pathTemplate}
               onSave={handleUpdatePathTemplate}
-              label="保存先テンプレート"
+              label="Path Template"
             />
           </div>
           {rule.conditions && rule.conditions.length > 0 && (
             <div>
-              <span className="font-semibold">条件:</span>{" "}
-              {rule.conditions.length}件
+              <span className="font-semibold">Conditions:</span>{" "}
+              {rule.conditions.length} rules
             </div>
           )}
         </div>

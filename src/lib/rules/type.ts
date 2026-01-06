@@ -5,7 +5,7 @@ const DEFAULT_RULES: RulesConfig = {
   rules: [
     {
       id: "r-docx",
-      name: "Wordの拡張子で保存",
+      name: "Save Word documents",
       enabled: true,
       domains: ["*"],
       conditions: [{ key: "ext", op: "in", value: ["doc", "docx"] }],
@@ -16,7 +16,7 @@ const DEFAULT_RULES: RulesConfig = {
     },
     {
       id: "r-images",
-      name: "画像ファイルで保存",
+      name: "Save image files",
       enabled: true,
       domains: ["*"],
       conditions: [
@@ -33,7 +33,7 @@ const DEFAULT_RULES: RulesConfig = {
     },
     {
       id: "r-catch-all",
-      name: "既定",
+      name: "Default",
       enabled: true,
       domains: ["*"],
       conditions: [],

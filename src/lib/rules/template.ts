@@ -48,16 +48,42 @@ const exactResolvers: Record<string, ExactResolver> = {
 };
 
 const resolveToken = (token: string, ctx: EvalCtx): string => {
-  // 固定
+  // Exact match
   const exact = exactResolvers[token];
   if (exact) return sanitizeSegment(exact(ctx));
 
-  // 未知トークンは空文字
+  // referrer.query.xxx format
+  if (token.startsWith("referrer.query.")) {
+    const key = token.slice(15);
+    return sanitizeSegment(ctx.referrerQuery?.[key] ?? "");
+  }
+
+  // referrer.host
+  if (token === "referrer.host") {
+    return sanitizeSegment(ctx.referrerHost ?? "");
+  }
+
+  // query.xxx format
+  if (token.startsWith("query.")) {
+    const key = token.slice(6);
+    // Prioritize download URL query, fallback to referrer query if not found
+    const value = ctx.query[key] ?? ctx.referrerQuery?.[key] ?? "";
+    return sanitizeSegment(value);
+  }
+
+  // path[N] format
+  const pathMatch = token.match(/^path\[(\d+)\]$/);
+  if (pathMatch) {
+    const idx = Number(pathMatch[1]);
+    return sanitizeSegment(ctx.pathSegments[idx] ?? "");
+  }
+
+  // Unknown tokens return empty string
   return "";
 };
 
 export const expandTemplate = (tpl: string, ctx: EvalCtx): string => {
-  // `{token}` を順に解決
+  // Resolve `{token}` in order
   const expanded = tpl.replace(/\{([^}]+)\}/g, (_, token: string) => {
     return resolveToken(token, ctx);
   });

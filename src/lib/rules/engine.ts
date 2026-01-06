@@ -1,6 +1,6 @@
 import type { Rule, RuleCondition } from "@/schemas/rules";
 
-/** glob から正規表現に変換 */
+/** Convert glob pattern to regular expression */
 export const globToRegExp = (glob: string): RegExp => {
   if (glob === "*") return /^.*$/;
   const esc = glob.replace(/[-/\\^$+?.()|[\]{}]/g, "\\$&");
@@ -8,16 +8,26 @@ export const globToRegExp = (glob: string): RegExp => {
   return new RegExp(re, "i");
 };
 
-/** ドメインパターンにホストが含まれるか判定 */
-export const isInDomain = (patterns: string[], host: string) =>
-  patterns.some((p) => globToRegExp(p).test(host));
+/** Check if host matches domain pattern */
+export const isInDomain = (
+  patterns: string[],
+  host: string,
+  referrerHost?: string
+) => {
+  // Match if either download URL host or referrer host matches the pattern
+  return patterns.some((p) => {
+    if (globToRegExp(p).test(host)) return true;
+    if (referrerHost && globToRegExp(p).test(referrerHost)) return true;
+    return false;
+  });
+};
 
-/** 評価用コンテキスト */
+/** Evaluation context */
 export type EvalCtx = {
   url: string; // download URL
-  protocol: string; // http 等のプロトコル
+  protocol: string; // Protocol like http
   host: string; // https://example.com -> example.com
-  port?: string; // 8080 等のポート番号
+  port?: string; // Port number like 8080
   path: string; // /path/to/file
   pathSegments: string[]; // /path/to/file -> ["path", "to", "file"]
   query: Record<string, string | undefined>; // ?key=value -> { key: "value" }
@@ -26,17 +36,37 @@ export type EvalCtx = {
   basename: string; // file
   ext: string; // pdf
   now: Date;
-  // 取れたら使う系（必要なら後で拡張）
+  // Optional fields (can be extended later if needed)
   mime?: string;
   referrerHost?: string;
+  referrerQuery?: Record<string, string | undefined>; // Query parameters from referrer
 };
 
-/** URL と DownloadItem から評価用コンテキストを構築 */
-export const buildCtx = (urlStr: string, filenameHint?: string): EvalCtx => {
+/** Build evaluation context from URL and DownloadItem */
+export const buildCtx = (
+  urlStr: string,
+  filenameHint?: string,
+  referrer?: string
+): EvalCtx => {
   const url = new URL(urlStr);
   const qs = Object.fromEntries(new URLSearchParams(url.search).entries());
 
-  // ファイル名の推定
+  // Parse referrer query parameters
+  let referrerQuery: Record<string, string | undefined> | undefined;
+  let referrerHost: string | undefined;
+  if (referrer) {
+    try {
+      const refUrl = new URL(referrer);
+      referrerHost = refUrl.hostname;
+      referrerQuery = Object.fromEntries(
+        new URLSearchParams(refUrl.search).entries()
+      );
+    } catch {
+      // Ignore if referrer is not a valid URL
+    }
+  }
+
+  // Infer filename
   let file = filenameHint;
   if (!file) {
     const p = url.pathname.split("/");
@@ -60,6 +90,8 @@ export const buildCtx = (urlStr: string, filenameHint?: string): EvalCtx => {
     basename,
     ext,
     now: new Date(),
+    referrerHost,
+    referrerQuery,
   };
 };
 
@@ -76,7 +108,14 @@ export const matchAll = (
     if (key === "protocol") return ctx.protocol;
     if (key === "mime") return ctx.mime ?? "";
     if (key === "hash") return ctx.hash ?? "";
-    if (key.startsWith("query.")) return ctx.query[key.slice(6)] ?? "";
+    if (key.startsWith("query.")) {
+      const queryKey = key.slice(6);
+      // Prioritize download URL query, fallback to referrer query if not found
+      return ctx.query[queryKey] ?? ctx.referrerQuery?.[queryKey] ?? "";
+    }
+    if (key.startsWith("referrer.query."))
+      return ctx.referrerQuery?.[key.slice(15)] ?? "";
+    if (key === "referrer.host") return ctx.referrerHost ?? "";
     const seg = key.match(/^path\[(\d+)\]$/);
     if (seg) return ctx.pathSegments[Number(seg[1])] ?? "";
     return "";
@@ -89,7 +128,7 @@ export const matchAll = (
       const hit = set.has(v.toLowerCase());
       return c.op === "in" ? hit : !hit;
     } else {
-      // TODO: string[] の時はどうするんすか
+      // TODO: What should we do when value is string[]?
       const val = c.value as string;
       switch (c.op) {
         case "equals":

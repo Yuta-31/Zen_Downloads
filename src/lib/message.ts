@@ -29,7 +29,7 @@ type Handler<C extends MsgCommand, R = unknown> = (
   sender: chrome.runtime.MessageSender
 ) => Promise<AppResponse<R>> | AppResponse<R>;
 
-/** 内部 cast 用の handler 型 */
+/** Internal handler type for casting */
 type HandlerAny<R = unknown> = (
   payload: MsgPayload,
   sender: chrome.runtime.MessageSender

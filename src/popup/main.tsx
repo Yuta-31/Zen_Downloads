@@ -6,10 +6,10 @@ const App: React.FC = () => {
     <div style={{ padding: 12, width: 260 }}>
       <h1 style={{ fontSize: 18, marginBottom: 8 }}>Download Helper</h1>
       <p style={{ fontSize: 13, marginBottom: 8 }}>
-        URL ベースでダウンロード先フォルダを自動振り分けします。
+        Automatically organize downloads into folders based on URL.
       </p>
       <p style={{ fontSize: 12, color: "#555" }}>
-        詳細なルールは「設定」ページから変更できます。
+        Configure detailed rules in the Settings page.
       </p>
     </div>
   );

@@ -1,5 +1,5 @@
 import { Link2, FileText, Wand2, FolderOutput } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -31,10 +31,33 @@ export const RulePreviewCard = () => {
   const [savePath, setSavePath] = useState<string | null>(null);
   const { rules } = useRules();
 
+  // Update preview when rule or test URL changes
+  useEffect(() => {
+    const updatePreview = () => {
+      const _ctx = buildCtx(testUrl);
+      const _matchedRule = rules
+        .filter((rule) => rule.enabled)
+        .find(
+          (rule) =>
+            isInDomain(rule.domains, _ctx.host, _ctx.referrerHost) &&
+            matchAll(rule.conditions, _ctx)
+        );
+      const _savePath = expandTemplate(
+        _matchedRule?.actions.pathTemplate ?? "",
+        _ctx
+      );
+      setPreviewCtx(_ctx);
+      setMatchedRule(_matchedRule ?? null);
+      setSavePath(_savePath);
+    };
+
+    updatePreview();
+  }, [testUrl, rules]);
+
   return (
     <Accordion type="single" collapsible defaultValue="preview">
       <AccordionItem value="preview" className="border-none">
-        {/* Card全体をトリガー化 */}
+        {/* Make entire card triggerable */}
         <Card className="bg-stone-50/70 shadow-inner border-stone-200 pb-0 pt-2">
           <AccordionTrigger className="hover:no-underline pr-6 cursor-pointer">
             <CardHeader className="w-full">
@@ -57,22 +80,7 @@ export const RulePreviewCard = () => {
                     <Input
                       value={testUrl}
                       onChange={(e) => {
-                        const _ctx = buildCtx(e.target.value);
-                        const _matchedRule = rules
-                          .filter((rule) => rule.enabled)
-                          .find(
-                            (rule) =>
-                              isInDomain(rule.domains, _ctx.host) &&
-                              matchAll(rule.conditions, _ctx)
-                          );
-                        const _savePath = expandTemplate(
-                          matchedRule?.actions.pathTemplate ?? "",
-                          _ctx
-                        );
                         setTestUrl(e.target.value);
-                        setPreviewCtx(_ctx);
-                        setMatchedRule(_matchedRule ?? null);
-                        setSavePath(_savePath);
                       }}
                       placeholder="https://example.com/file.docx"
                       className="h-9 bg-white/70"

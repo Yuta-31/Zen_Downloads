@@ -53,7 +53,7 @@ export const RulesProvider: React.FC<RulesProviderProps> = ({ children }) => {
         writeRules(parsed);
       } catch (e) {
         const message = e instanceof Error ? e.message : String(e);
-        alert("保存できません (JSON or スキーマ不正) \n" + message);
+        alert("Cannot save (Invalid JSON or schema) \n" + message);
       }
     }
   }, [rules]);
@@ -75,7 +75,7 @@ export const RulesProvider: React.FC<RulesProviderProps> = ({ children }) => {
     const next = clone(rules);
     next.unshift({
       id: `r-${Date.now()}`,
-      name: "新しいルール",
+      name: "New Rule",
       enabled: true,
       domains: ["*"],
       conditions: [],

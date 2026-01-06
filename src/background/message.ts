@@ -12,7 +12,7 @@ export const attachMessageListeners = () => {
         .replace(/\.+$/, "");
       const finalName = /\.[A-Za-z0-9]+$/.test(safe) ? safe : `${safe}.json`;
 
-      // ★ createObjectURL は使わず data: を作る
+      // Create data URL instead of using createObjectURL
       const dataUrl =
         "data:application/json;charset=utf-8," + encodeURIComponent(msg.json);
 
@@ -20,7 +20,7 @@ export const attachMessageListeners = () => {
         url: dataUrl,
         filename: finalName,
         conflictAction: "uniquify",
-        saveAs: false, // ← ここがポイント（ダイアログ出さない）
+        saveAs: false, // Key point: don't show save dialog
       });
 
       return { ok: true, data: { id } };
