@@ -73,7 +73,7 @@ export const RulesProvider: React.FC<RulesProviderProps> = ({ children }) => {
   // add rule
   const addRule = async () => {
     const next = clone(rules);
-    next.unshift({
+    next.push({
       id: `r-${Date.now()}`,
       name: "New Rule",
       enabled: true,

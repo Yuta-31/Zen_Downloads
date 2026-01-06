@@ -6,6 +6,17 @@ import { Switch } from "@/components/ui/switch";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { useRulesDispatch } from "@/options/hooks/useRules";
 import type { Rule } from "@/schemas/rules";
 
@@ -143,7 +154,7 @@ const RuleHeader = ({
         onClick={onClick}
       >
         <div className="flex-1 ml-2">
-          <div className="font-bold text-stone-700">{rule.name}</div>
+          <div className="text-xl font-bold text-stone-700">{rule.name}</div>
           {!isOpen && (
             <div className="text-xs text-stone-500 mt-1 space-y-0.5">
               <span className="font-medium">
@@ -164,19 +175,38 @@ const RuleHeader = ({
               e.stopPropagation();
             }}
           />
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-8 w-8"
-            onClick={(e) => {
-              e.stopPropagation();
-              if (confirm(`Delete rule "${rule.name}"?`)) {
-                removeRule(rule.id);
-              }
-            }}
-          >
-            <Trash2 className="h-4 w-4 text-red-600" />
-          </Button>
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8"
+                onClick={(e) => {
+                  e.stopPropagation();
+                }}
+              >
+                <Trash2 className="h-4 w-4 text-red-600" />
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent onClick={(e) => e.stopPropagation()}>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Delete Rule</AlertDialogTitle>
+                <AlertDialogDescription>
+                  Are you sure you want to delete the rule "{rule.name}"? This
+                  action cannot be undone.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction
+                  onClick={() => removeRule(rule.id)}
+                  className="bg-red-600 hover:bg-red-700"
+                >
+                  Delete
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
         </div>
       </div>
     </div>

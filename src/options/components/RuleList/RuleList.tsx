@@ -46,7 +46,12 @@ const RuleList = () => {
   return (
     <section>
       <div className="w-full flex items-center justify-between px-2 h-12">
-        <div className="text-2xl font-bold">Rule List</div>
+        <div>
+          <div className="text-2xl font-bold">Rule List</div>
+          <div className="text-xs text-stone-500 mt-0.5">
+            Rules are evaluated from top to bottom
+          </div>
+        </div>
         <div className="flex gap-2">
           <HoverExpandButton
             icon={<Plus />}
