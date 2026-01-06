@@ -1,4 +1,4 @@
-import { Trash2 } from "lucide-react";
+import { Trash2, Pencil } from "lucide-react";
 import { DragControls, motion } from "framer-motion";
 import { GripVertical } from "lucide-react";
 import { useEffect, useState, useRef } from "react";
@@ -235,14 +235,14 @@ const EditableField = ({ value, onSave, label }: EditableFieldProps) => {
 
   if (isEditing) {
     return (
-      <div onClick={(e) => e.stopPropagation()}>
+      <div onClick={(e) => e.stopPropagation()} className="-ml-2">
         <Input
           ref={inputRef}
           value={editValue}
           onChange={(e) => setEditValue(e.target.value)}
           onBlur={handleSave}
           onKeyDown={handleKeyDown}
-          className="text-sm"
+          className="h-auto min-h-0 px-2 py-1 text-sm border-stone-300 focus-visible:ring-1"
         />
       </div>
     );
@@ -254,10 +254,11 @@ const EditableField = ({ value, onSave, label }: EditableFieldProps) => {
         e.stopPropagation();
         setIsEditing(true);
       }}
-      className="cursor-text hover:bg-stone-100 px-2 py-1 rounded transition-colors -ml-2"
+      className="group cursor-text hover:bg-stone-100 px-2 py-1 rounded transition-colors -ml-2 border border-transparent flex items-center gap-1"
       title={`Click to edit ${label}`}
     >
-      {value}
+      <span className="flex-1">{value}</span>
+      <Pencil className="h-3 w-3 text-stone-400 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0" />
     </div>
   );
 };
@@ -295,34 +296,37 @@ const RuleDetails = ({ rule }: RuleDetailsProps) => {
             label="Rule Name"
           />
         </div>
-        <div className="space-y-2 text-sm text-stone-600">
-          <div>
-            <span className="font-semibold">ID:</span> {rule.id}
+        <div className="space-y-3 text-sm text-stone-600">
+          <div className="flex items-center gap-2">
+            <span className="font-semibold whitespace-nowrap w-20">
+              Domain:
+            </span>
+            <div className="flex-1">
+              <EditableField
+                value={rule.domains.join(", ")}
+                onSave={handleUpdateDomains}
+                label="Domain"
+              />
+            </div>
           </div>
-          <div>
-            <span className="font-semibold">Status:</span>{" "}
-            {rule.enabled ? "Enabled" : "Disabled"}
-          </div>
-          <div className="flex items-start gap-2">
-            <span className="font-semibold whitespace-nowrap">Domain:</span>
-            <EditableField
-              value={rule.domains.join(", ")}
-              onSave={handleUpdateDomains}
-              label="Domain"
-            />
-          </div>
-          <div className="flex items-start gap-2">
-            <span className="font-semibold whitespace-nowrap">Save to:</span>
-            <EditableField
-              value={rule.actions.pathTemplate}
-              onSave={handleUpdatePathTemplate}
-              label="Path Template"
-            />
+          <div className="flex items-center gap-2">
+            <span className="font-semibold whitespace-nowrap w-20">
+              Save to:
+            </span>
+            <div className="flex-1">
+              <EditableField
+                value={rule.actions.pathTemplate}
+                onSave={handleUpdatePathTemplate}
+                label="Path Template"
+              />
+            </div>
           </div>
           {rule.conditions && rule.conditions.length > 0 && (
-            <div>
-              <span className="font-semibold">Conditions:</span>{" "}
-              {rule.conditions.length} rules
+            <div className="flex items-center gap-2">
+              <span className="font-semibold whitespace-nowrap w-20">
+                Conditions:
+              </span>
+              <span>{rule.conditions.length} rules</span>
             </div>
           )}
         </div>
