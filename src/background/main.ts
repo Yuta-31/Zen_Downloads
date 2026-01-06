@@ -74,6 +74,31 @@ const processDownload = async (
     suggest(suggestion);
     logger.info("Suggested successfully");
 
+    // Send notification to the active tab where download was initiated
+    try {
+      const tabs = await chrome.tabs.query({
+        active: true,
+        currentWindow: true,
+      });
+      if (tabs[0]?.id) {
+        chrome.tabs
+          .sendMessage(tabs[0].id, {
+            type: "download-organized",
+            data: {
+              ruleName: rule.name,
+              ruleId: rule.id,
+              path: newPath,
+              filename: item.filename,
+            },
+          })
+          .catch((e) => {
+            logger.debug("Could not send message to tab:", e);
+          });
+      }
+    } catch (e) {
+      logger.debug("Failed to notify tab:", e);
+    }
+
     return true;
   } catch (e) {
     logger.error("Failed to build filename:", e);
