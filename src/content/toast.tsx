@@ -1,5 +1,6 @@
 import { toast, Toaster } from "sonner";
-import "../index.css";
+import "./content.css";
+import { createRoot } from "react-dom/client";
 import { getSettings } from "@/lib/settings";
 
 // Insert Toaster component into the page
@@ -11,10 +12,8 @@ const root = document.createElement("div");
 toasterContainer.appendChild(root);
 
 // Render Toaster
-import { createRoot } from "react-dom/client";
-
 createRoot(root).render(
-  <Toaster position="bottom-right" richColors duration={5000} />
+  <Toaster position="bottom-right" richColors duration={5000} />,
 );
 
 // Listen for download notifications from background script

@@ -1,0 +1,57 @@
+/* Content script specific styles - scoped to avoid conflicts with host page */
+#custom-download-path-toaster {
+  /* Reset to avoid inheritance from host page */
+  all: initial;
+
+  /* Position the toaster container */
+  position: fixed !important;
+  z-index: 2147483647 !important; /* Maximum z-index to stay on top */
+  pointer-events: none !important;
+
+  /* Allow clicks through the container but not through toasts */
+  * {
+    pointer-events: auto;
+  }
+}
+
+/* Sonner toast styles - isolated within our container */
+#custom-download-path-toaster [data-sonner-toaster] {
+  font-family:
+    -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu",
+    "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+#custom-download-path-toaster [data-sonner-toast] {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  box-shadow:
+    0 4px 6px -1px rgba(0, 0, 0, 0.1),
+    0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  padding: 16px;
+  color: #1f2937;
+}
+
+#custom-download-path-toaster [data-sonner-toast][data-type="success"] {
+  background: #f0fdf4;
+  border-color: #86efac;
+}
+
+#custom-download-path-toaster .space-y-1 > * + * {
+  margin-top: 0.25rem;
+}
+
+#custom-download-path-toaster .text-xs {
+  font-size: 0.75rem;
+  line-height: 1rem;
+}
+
+#custom-download-path-toaster .font-semibold {
+  font-weight: 600;
+}
+
+#custom-download-path-toaster .break-all {
+  word-break: break-all;
+}

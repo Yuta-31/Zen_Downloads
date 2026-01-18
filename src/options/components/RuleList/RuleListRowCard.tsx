@@ -221,9 +221,15 @@ interface EditableFieldProps {
   value: string;
   onSave: (value: string) => void;
   label: string;
+  className?: string;
 }
 
-const EditableField = ({ value, onSave, label }: EditableFieldProps) => {
+const EditableField = ({
+  value,
+  onSave,
+  label,
+  className,
+}: EditableFieldProps) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editValue, setEditValue] = useState(value);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -272,7 +278,7 @@ const EditableField = ({ value, onSave, label }: EditableFieldProps) => {
           onChange={(e) => setEditValue(e.target.value)}
           onBlur={handleSave}
           onKeyDown={handleKeyDown}
-          className="h-auto min-h-0 px-2 py-1 text-sm border-stone-300 focus-visible:ring-1"
+          className={`h-auto min-h-0 px-2 py-1 border-stone-300 focus-visible:ring-1 ${className || "text-sm"}`}
         />
       </div>
     );
@@ -284,10 +290,10 @@ const EditableField = ({ value, onSave, label }: EditableFieldProps) => {
         e.stopPropagation();
         setIsEditing(true);
       }}
-      className="group cursor-text hover:bg-stone-100 px-2 py-1 rounded transition-colors -ml-2 border border-transparent flex items-center gap-1"
+      className={`group cursor-text hover:bg-stone-100 px-2 py-1 rounded transition-colors -ml-2 border border-transparent flex items-center gap-1 ${className || ""}`}
       title={`Click to edit ${label}`}
     >
-      <span className="flex-1">{value}</span>
+      <span className="flex-1 break-words">{value}</span>
       <Pencil className="h-3 w-3 text-stone-400 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0" />
     </div>
   );
@@ -319,11 +325,12 @@ const RuleDetails = ({ rule }: RuleDetailsProps) => {
   return (
     <div className="p-6 space-y-4">
       <div className="flex-1">
-        <div className="text-lg font-semibold text-stone-800 mb-4">
+        <div className="mb-4">
           <EditableField
             value={rule.name}
             onSave={handleUpdateName}
             label="Rule Name"
+            className="text-lg font-semibold text-stone-800"
           />
         </div>
         <div className="space-y-3 text-sm text-stone-600">

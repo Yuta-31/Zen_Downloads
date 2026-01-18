@@ -21,11 +21,11 @@ export interface RulesDispatchContextType {
   removeRule: (id: string) => Promise<void>;
   reorderRules: (rules: Rule[]) => Promise<void>;
   exportToJson: () => Promise<Rule[]>;
-  importFromJson: (jsonText: string) => void;
+  importFromJson: (rules: Rule[]) => void;
 }
 
 export const RulesContext = createContext<RulesContextType | undefined>(
-  undefined
+  undefined,
 );
 export const RulesDispatchContext = createContext<
   RulesDispatchContextType | undefined
@@ -37,26 +37,29 @@ interface RulesProviderProps {
 
 export const RulesProvider: React.FC<RulesProviderProps> = ({ children }) => {
   const [rules, setRules] = useState<Rule[]>([]);
+  const [isInitialLoad, setIsInitialLoad] = useState(true);
 
   useEffect(() => {
     (async () => {
       const loadedRules = await readRules();
       setRules(loadedRules);
+      setIsInitialLoad(false);
     })();
   }, []);
 
   useEffect(() => {
-    if (!!rules && rules.length > 0) {
-      try {
-        const parsed = RulesSchema.parse(rules);
-        console.log("Writing rules to storage:", parsed);
-        writeRules(parsed);
-      } catch (e) {
-        const message = e instanceof Error ? e.message : String(e);
-        alert("Cannot save (Invalid JSON or schema) \n" + message);
-      }
+    // Skip saving during initial load
+    if (isInitialLoad) return;
+
+    try {
+      const parsed = RulesSchema.parse(rules);
+      console.log("Writing rules to storage:", parsed);
+      writeRules(parsed);
+    } catch (e) {
+      const message = e instanceof Error ? e.message : String(e);
+      alert("Cannot save (Invalid JSON or schema) \n" + message);
     }
-  }, [rules]);
+  }, [rules, isInitialLoad]);
 
   // toggle enable/disable
   const toggleEnable = async (id: string) => {
@@ -113,10 +116,15 @@ export const RulesProvider: React.FC<RulesProviderProps> = ({ children }) => {
     return latestRules;
   };
 
-  // Import - takes JSON text and sets it as the current rules
-  const importFromJson = (json: string) => {
-    const parsed = JSON.parse(json);
-    setRules(parsed);
+  // Import - takes parsed rules array and sets it as the current rules
+  const importFromJson = (rules: Rule[]) => {
+    try {
+      const parsed = RulesSchema.parse(rules);
+      setRules(parsed);
+    } catch (e) {
+      const message = e instanceof Error ? e.message : String(e);
+      alert("Cannot import rules (Invalid format or schema)\n" + message);
+    }
   };
 
   const stateValue: RulesContextType = {

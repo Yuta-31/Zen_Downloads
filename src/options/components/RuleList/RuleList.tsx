@@ -39,8 +39,8 @@ const RuleList = () => {
     const file = await pickFileAsJson();
     if (!file) return;
     const text = await file.text();
-    const json = JSON.parse(text);
-    await importFromJson(json);
+    const rules = JSON.parse(text);
+    importFromJson(rules);
   };
 
   return (
