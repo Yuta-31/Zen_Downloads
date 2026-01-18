@@ -1,12 +1,15 @@
 {
   "manifest_version": 3,
-  "name": "Download Helper",
-  "version": "0.1.0",
+  "name": "Download Router",
+  "version": "1.0.0",
   "description": "Automatically organize downloads into folders based on URL.",
   "icons": {
-    "128": "icon128.png"
+    "128": "icon128.png",
+    "48": "icon48.png",
+    "32": "icon32.png",
+    "16": "icon16.png"
   },
-  "permissions": ["downloads", "downloads.shelf", "storage", "tabs"],
+  "permissions": ["downloads", "storage", "tabs"],
   "background": {
     "service_worker": "background.js",
     "type": "module"
@@ -19,8 +22,7 @@
     }
   ],
   "action": {
-    "default_popup": "popup/index.html",
-    "default_title": "Download Helper"
+    "default_title": "Download Router"
   },
   "options_page": "options/index.html"
 }

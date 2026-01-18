@@ -1,4 +1,4 @@
-# Download Helper
+# Download Router
 
 ![Version](https://img.shields.io/badge/version-0.1.0-blue.svg)
 ![License](https://img.shields.io/badge/license-MIT-green.svg)
@@ -166,11 +166,22 @@ src/
 
 - **Framework**: React 19 + TypeScript
 - **Build Tool**: Vite
-- **UI Components**: Radix UI
+- **UI Components**: shadcn/ui (Radix UI primitives + class-variance-authority)
 - **Styling**: Tailwind CSS
 - **State Management**: React Context
 - **Validation**: Zod
 - **Testing**: Vitest
+
+### UI Components
+
+The UI follows the shadcn/ui approach:
+
+- **Location**: Components live under [src/components/ui](src/components/ui)
+- **Primitives**: Built on Radix UI (e.g., `@radix-ui/react-alert-dialog`)
+- **Variants**: Styled via `class-variance-authority (cva)` with consistent `variant` and `size` props
+- **Composition**: Uses `Slot` and a `cn` utility for class merging
+
+When adding components, mirror existing patterns (e.g., [Button](src/components/ui/button.tsx)) and export both the component and its variants for reuse.
 
 ## Contributing
 
@@ -203,5 +214,5 @@ npm run license:generate
 ## Acknowledgments
 
 - Built with [Vite](https://vitejs.dev/)
-- UI components from [Radix UI](https://www.radix-ui.com/)
+- UI built with [shadcn/ui](https://ui.shadcn.com/) on top of [Radix UI](https://www.radix-ui.com/)
 - Icons from [Lucide](https://lucide.dev/)
