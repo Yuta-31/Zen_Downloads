@@ -114,7 +114,7 @@ const App = () => {
             </div>
             <Switch
               checked={!isPaused}
-              onCheckedChange={(checked) => handleToggle(!checked)}
+              onCheckedChange={(checked) => handleToggle(checked === false)}
             />
           </div>
 
