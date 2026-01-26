@@ -391,10 +391,30 @@ const RuleDetails = ({ rule }: RuleDetailsProps) => {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="global">Use Global Default</SelectItem>
-                  <SelectItem value="uniquify">Uniquify</SelectItem>
-                  <SelectItem value="overwrite">Overwrite</SelectItem>
-                  <SelectItem value="prompt">Prompt</SelectItem>
+                  <SelectItem value="global">
+                    Use Global Default -{" "}
+                    <span className="text-muted-foreground">
+                      Follows the setting in preferences
+                    </span>
+                  </SelectItem>
+                  <SelectItem value="uniquify">
+                    Uniquify -{" "}
+                    <span className="text-muted-foreground">
+                      Add (1), (2)... to filename
+                    </span>
+                  </SelectItem>
+                  <SelectItem value="overwrite">
+                    Overwrite -{" "}
+                    <span className="text-muted-foreground">
+                      Replace existing file
+                    </span>
+                  </SelectItem>
+                  <SelectItem value="prompt">
+                    Prompt -{" "}
+                    <span className="text-muted-foreground">
+                      Ask me what to do
+                    </span>
+                  </SelectItem>
                 </SelectContent>
               </Select>
             </div>
