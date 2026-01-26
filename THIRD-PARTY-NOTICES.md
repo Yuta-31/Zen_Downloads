@@ -185,7 +185,6 @@
 [detect-node-es@1.1.0](https://github.com/thekashey/detect-node) - MIT
 [dezalgo@1.0.4](https://github.com/npm/dezalgo) - ISC
 [doctrine@2.1.0](https://github.com/eslint/doctrine) - Apache-2.0
-[download_router@1.0.0](undefined) - UNLICENSED
 [dunder-proto@1.0.1](https://github.com/es-shims/dunder-proto) - MIT
 [electron-to-chromium@1.5.267](https://github.com/kilian/electron-to-chromium) - ISC
 [enhanced-resolve@5.18.4](https://github.com/webpack/enhanced-resolve) - MIT
@@ -475,4 +474,5 @@
 [xmlchars@2.2.0](https://github.com/lddubeau/xmlchars) - MIT
 [yallist@3.1.1](https://github.com/isaacs/yallist) - ISC
 [yocto-queue@0.1.0](https://github.com/sindresorhus/yocto-queue) - MIT
+[zen-downloads@1.1.0](undefined) - UNLICENSED
 [zod@4.3.5](https://github.com/colinhacks/zod) - MIT
