@@ -31,9 +31,13 @@ export const SettingsCard = () => {
 
   useEffect(() => {
     logger.info("Loading settings...");
-    getSettings().then((settings) => {
-      logger.info("Settings loaded:", settings);
-      setSettings(settings);
+    getSettings().then((loadedSettings) => {
+      logger.info("Settings loaded:", loadedSettings);
+      logger.info(
+        "defaultConflictAction:",
+        loadedSettings.defaultConflictAction,
+      );
+      setSettings(loadedSettings);
     });
   }, []);
 
@@ -50,11 +54,14 @@ export const SettingsCard = () => {
     setSettings((prev) => ({ ...prev, theme: newTheme }));
   };
 
-  const handleConflictActionChange = async (action: ConflictAction) => {
-    logger.info(`Changing default conflict action to: ${action}`);
+  const handleConflictActionChange = async (value: string) => {
+    logger.info(`Changing default conflict action to: ${value}`);
+    const action = value as ConflictAction;
     const newSettings = { ...settings, defaultConflictAction: action };
+    logger.info("New settings:", newSettings);
     setSettings(newSettings);
     await updateSettings(newSettings);
+    logger.info("Settings updated successfully");
   };
 
   return (

@@ -7,6 +7,13 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
   AlertDialog,
   AlertDialogAction,
   AlertDialogCancel,
@@ -19,6 +26,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { useRulesDispatch } from "@/options/hooks/useRules";
 import type { Rule } from "@/schemas/rules";
+import type { ConflictAction } from "@/schemas/rules";
 
 const MotionCard = motion(Card);
 
@@ -327,6 +335,13 @@ const RuleDetails = ({ rule }: RuleDetailsProps) => {
     });
   };
 
+  const handleUpdateConflictAction = (value: string) => {
+    const conflict = value === "global" ? undefined : (value as ConflictAction);
+    updateRule(rule.id, {
+      actions: { ...rule.actions, conflict },
+    });
+  };
+
   return (
     <div className="p-6 space-y-4">
       <div className="flex-1">
@@ -361,6 +376,27 @@ const RuleDetails = ({ rule }: RuleDetailsProps) => {
                 onSave={handleUpdatePathTemplate}
                 label="Path Template"
               />
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="font-semibold whitespace-nowrap w-20">
+              On Conflict:
+            </span>
+            <div className="flex-1">
+              <Select
+                value={rule.actions.conflict || "global"}
+                onValueChange={handleUpdateConflictAction}
+              >
+                <SelectTrigger className="h-8">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="global">Use Global Default</SelectItem>
+                  <SelectItem value="uniquify">Uniquify</SelectItem>
+                  <SelectItem value="overwrite">Overwrite</SelectItem>
+                  <SelectItem value="prompt">Prompt</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
           </div>
           {rule.conditions && rule.conditions.length > 0 && (

@@ -65,10 +65,14 @@ const processDownload = async (
 
     // Get settings to determine conflict action
     const settings = await getSettings();
+    logger.info("Loaded settings:", settings);
+    logger.info("Rule conflict action:", rule.actions.conflict);
+    logger.info("Default conflict action:", settings.defaultConflictAction);
 
     // Use rule's conflict action if specified, otherwise use default from settings
     const conflictAction =
-      rule.actions.conflict || settings.defaultConflictAction;
+      rule.actions.conflict ?? settings.defaultConflictAction;
+    logger.info("Final conflict action:", conflictAction);
 
     // Suggest the new filename to Chrome
     logger.info("Suggesting filename to Chrome...");
