@@ -1,7 +1,7 @@
 import { buildCtx } from "@/lib/rules/engine";
 import { expandTemplate } from "@/lib/rules/template";
-import type { Rule } from "@/schemas/rules";
 import { createLogger } from "@/background/lib/logger";
+import type { Rule } from "@/schemas/rules";
 
 const logger = createLogger("[PathBuilder]");
 

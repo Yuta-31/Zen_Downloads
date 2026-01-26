@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "Download Router",
-  "version": "1.0.0",
-  "description": "Automatically organize downloads into folders based on URL.",
+  "name": "Zen Downloads",
+  "version": "1.1.0",
+  "description": "Stop organizing manually. Automatically route downloads to the right folders with smart rules. Chaos to order, instantly.",
   "icons": {
     "128": "icon128.png",
     "48": "icon48.png",
@@ -22,7 +22,7 @@
     }
   ],
   "action": {
-    "default_title": "Download Router"
+    "default_title": "Zen Downloads"
   },
   "options_page": "options/index.html"
 }

@@ -52,7 +52,7 @@ const RuleListRowCard = ({
       onClick={() => {
         console.log(`Clicked on rule: ${rule.name}`);
       }}
-      className="bg-stone-50/100 cursor-pointer gap-0 p-0 w-full"
+      className="bg-stone-50/100 dark:bg-slate-700 cursor-pointer gap-0 p-0 w-full"
       transition={{
         layout: { duration: CARD_ANIM_MS / 1000, ease: "easeInOut" },
       }}
@@ -120,7 +120,7 @@ const RuleHeader = ({
           "flex items-center justify-center",
           "transition-all duration-150 ease-in-out",
           "rounded-l-xl",
-          "border-r border-stone-100",
+          "border-r border-stone-100 dark:border-slate-600",
           isDragging
             ? "translate-y-0 shadow-inner border-b-[0px]"
             : "hover:shadow-md hover:border-b-[2px]",
@@ -146,7 +146,10 @@ const RuleHeader = ({
           onDragEnd();
         }}
       >
-        <GripVertical className="text-stone-400" size="30" />
+        <GripVertical
+          className="text-stone-400 dark:text-slate-500"
+          size="30"
+        />
       </motion.div>
 
       <div
@@ -154,9 +157,11 @@ const RuleHeader = ({
         onClick={onClick}
       >
         <div className="flex-1 ml-2">
-          <div className="text-xl font-bold text-stone-700">{rule.name}</div>
+          <div className="text-xl font-bold text-stone-700 dark:text-stone-200">
+            {rule.name}
+          </div>
           {!isOpen && (
-            <div className="text-xs text-stone-500 mt-1 space-y-0.5">
+            <div className="text-xs text-stone-500 dark:text-stone-400 mt-1 space-y-0.5">
               <span className="font-medium">
                 {rule.domains.join(", ")} {">"} {rule.actions.pathTemplate}
               </span>
@@ -290,11 +295,11 @@ const EditableField = ({
         e.stopPropagation();
         setIsEditing(true);
       }}
-      className={`group cursor-text hover:bg-stone-100 px-2 py-1 rounded transition-colors -ml-2 border border-transparent flex items-center gap-1 ${className || ""}`}
+      className={`group cursor-text hover:bg-stone-100 dark:hover:bg-slate-600 px-2 py-1 rounded transition-colors -ml-2 border border-transparent flex items-center gap-1 ${className || ""}`}
       title={`Click to edit ${label}`}
     >
       <span className="flex-1 break-words">{value}</span>
-      <Pencil className="h-3 w-3 text-stone-400 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0" />
+      <Pencil className="h-3 w-3 text-stone-400 dark:text-stone-500 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0" />
     </div>
   );
 };
@@ -330,10 +335,10 @@ const RuleDetails = ({ rule }: RuleDetailsProps) => {
             value={rule.name}
             onSave={handleUpdateName}
             label="Rule Name"
-            className="text-lg font-semibold text-stone-800"
+            className="text-lg font-semibold text-stone-800 dark:text-stone-200"
           />
         </div>
-        <div className="space-y-3 text-sm text-stone-600">
+        <div className="space-y-3 text-sm text-stone-600 dark:text-stone-300">
           <div className="flex items-center gap-2">
             <span className="font-semibold whitespace-nowrap w-20">
               Domain:

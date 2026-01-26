@@ -1,32 +1,97 @@
 import { useState, useEffect } from "react";
 import { Switch } from "@/components/ui/switch";
-import { getSettings, updateSettings, type AppSettings } from "@/lib/settings";
+import { Button } from "@/components/ui/button";
+import {
+  getSettings,
+  updateSettings,
+  type AppSettings,
+  type Theme,
+} from "@/lib/settings";
+import { useTheme } from "@/options/hooks/useTheme";
+import { Sun, Moon, Monitor } from "lucide-react";
+import { createLogger } from "@/options/lib/logger";
+
+const logger = createLogger("[SettingsCard]");
 
 export const SettingsCard = () => {
   const [settings, setSettings] = useState<AppSettings>({
     showToastNotifications: true,
+    theme: "system",
   });
+  const { theme, setTheme } = useTheme();
 
   useEffect(() => {
-    getSettings().then(setSettings);
+    logger.info("Loading settings...");
+    getSettings().then((settings) => {
+      logger.info("Settings loaded:", settings);
+      setSettings(settings);
+    });
   }, []);
 
   const handleToggleToast = async (checked: boolean) => {
+    logger.info(`Toggling toast notifications: ${checked}`);
     const newSettings = { ...settings, showToastNotifications: checked };
     setSettings(newSettings);
     await updateSettings(newSettings);
   };
 
+  const handleThemeChange = async (newTheme: Theme) => {
+    logger.info(`Changing theme to: ${newTheme}`);
+    await setTheme(newTheme);
+    setSettings((prev) => ({ ...prev, theme: newTheme }));
+  };
+
   return (
     <div className="space-y-6 py-4">
+      {/* Theme Section */}
       <div className="space-y-4">
-        <h3 className="text-sm font-semibold text-stone-700">Notifications</h3>
+        <h3 className="text-sm font-semibold">Appearance</h3>
+        <div className="space-y-2">
+          <label className="text-sm font-medium">Theme</label>
+          <p className="text-xs text-muted-foreground">
+            Choose how Zen Downloads looks on your device
+          </p>
+          <div className="flex gap-2 pt-2">
+            <Button
+              variant={theme === "light" ? "default" : "outline"}
+              size="sm"
+              className="flex-1"
+              onClick={() => handleThemeChange("light")}
+            >
+              <Sun className="h-4 w-4 mr-2" />
+              Light
+            </Button>
+            <Button
+              variant={theme === "dark" ? "default" : "outline"}
+              size="sm"
+              className="flex-1"
+              onClick={() => handleThemeChange("dark")}
+            >
+              <Moon className="h-4 w-4 mr-2" />
+              Dark
+            </Button>
+            <Button
+              variant={theme === "system" ? "default" : "outline"}
+              size="sm"
+              className="flex-1"
+              onClick={() => handleThemeChange("system")}
+            >
+              <Monitor className="h-4 w-4 mr-2" />
+              System
+            </Button>
+          </div>
+        </div>
+      </div>
+
+      {/* Notifications Section */}
+      <div className="space-y-4">
+        <h3 className="text-sm font-semibold">Notifications</h3>
         <div className="flex items-center justify-between py-2">
           <div className="space-y-0.5 flex-1">
-            <label className="text-sm font-medium text-stone-800">
+            <label className="text-sm font-medium">
               Show Toast Notifications
             </label>
-            <p className="text-xs text-stone-500">
+            <p className="text-xs text-muted-foreground">
               Display a notification on the page when a download is organized
             </p>
           </div>

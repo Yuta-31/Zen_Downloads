@@ -6,6 +6,9 @@ import { useRules, useRulesDispatch } from "@/options/hooks/useRules";
 import RuleListRowCard from "./RuleListRowCard";
 import HoverExpandButton from "./HoverExpandButton";
 import type { Rule } from "@/schemas/rules";
+import { createLogger } from "@/options/lib/logger";
+
+const logger = createLogger("[RuleList]");
 
 const RuleList = () => {
   const { rules } = useRules();
@@ -31,24 +34,38 @@ const RuleList = () => {
   };
 
   const handleDownload = async () => {
+    logger.info("Exporting rules to file...");
     const cfg = await exportToJson();
     downloadJson(cfg, "download-helper-rules.json");
+    logger.info("Rules exported successfully");
   };
 
   const handleUpload = async () => {
-    const file = await pickFileAsJson();
-    if (!file) return;
-    const text = await file.text();
-    const rules = JSON.parse(text);
-    importFromJson(rules);
+    try {
+      logger.info("Importing rules from file...");
+      const file = await pickFileAsJson();
+      if (!file) {
+        logger.info("File selection cancelled");
+        return;
+      }
+      logger.info(`Reading file: ${file.name}`);
+      const text = await file.text();
+      const rules = JSON.parse(text);
+      importFromJson(rules);
+    } catch (e) {
+      logger.error("Failed to import rules from file:", e);
+      alert("Failed to import rules. Please check the file format.");
+    }
   };
 
   return (
     <section>
       <div className="w-full flex items-center justify-between px-2 h-12">
         <div>
-          <div className="text-2xl font-bold">Rule List</div>
-          <div className="text-xs text-stone-500 mt-0.5">
+          <div className="text-2xl font-bold dark:text-stone-100">
+            Rule List
+          </div>
+          <div className="text-xs text-stone-500 dark:text-stone-400 mt-0.5">
             Rules are evaluated from top to bottom
           </div>
         </div>
@@ -74,7 +91,7 @@ const RuleList = () => {
       <LayoutGroup>
         <div
           // layout
-          className="p-4 rounded-md shadow-inner bg-stone-200 grid grid-cols-1 gap-1"
+          className="p-4 rounded-md shadow-inner bg-stone-200 dark:bg-slate-800 grid grid-cols-1 gap-1"
           // transition={{ layout: { duration: 0.3, ease: "easeInOut" } }}
         >
           <Reorder.Group

@@ -1,12 +1,12 @@
-# Download Router
+# Zen Downloads
 
-![Version](https://img.shields.io/badge/version-0.1.0-blue.svg)
+![Version](https://img.shields.io/badge/version-1.1.0-blue.svg)
 ![License](https://img.shields.io/badge/license-MIT-green.svg)
 ![Chrome](https://img.shields.io/badge/chrome-extension-orange.svg)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue.svg)
 ![React](https://img.shields.io/badge/React-19-61dafb.svg)
 
-A Chrome extension that automatically organizes your downloads into folders based on customizable rules.
+A Chrome extension that automatically organizes your downloads into folders based on customizable rules. Stop organizing manually. Chaos to order, instantly.
 
 ## Features
 
@@ -182,6 +182,33 @@ The UI follows the shadcn/ui approach:
 - **Composition**: Uses `Slot` and a `cn` utility for class merging
 
 When adding components, mirror existing patterns (e.g., [Button](src/components/ui/button.tsx)) and export both the component and its variants for reuse.
+
+## Changelog
+
+### Version 1.1.0 (2026-01-26)
+
+**Improvements:**
+- Enhanced preview display with `Downloads/` prefix to clearly show the final save location
+- Added informative notes explaining that actual downloads may use different filenames provided by the server
+- Empty test URL now displays a default preview (`Downloads/{file}`)
+- Rules without matches now show the default save path in preview
+
+**Bug Fixes:**
+- Fixed an issue where rules might not apply on the first download after opening the browser (improved rule cache initialization)
+
+**Developer Experience:**
+- Added comprehensive logging throughout the options UI (RulesContext, SettingsCard, RuleList, file operations)
+- Improved debugging capabilities with structured logger output
+
+### Version 1.0.0 (2024-01-15)
+
+**Initial Release:**
+- Automatic download organization based on customizable rules
+- Flexible rules engine with multiple conditions and operators
+- Dynamic path templates with date, URL, and file variables
+- Real-time preview of rule outcomes
+- Import/export functionality for rule configurations
+- Modern React-based settings UI with dark mode support
 
 ## Contributing
 

@@ -8,13 +8,12 @@ import { buildDownloadPath } from "./lib/pathBuilder";
 const logger = createLogger("[Main]");
 
 attachMessageListeners();
-initRulesCache().catch((e) => logger.error("Failed to init rules cache:", e));
 
 const processed = new Set<number>();
 
 const handler = (
   item: chrome.downloads.DownloadItem,
-  suggest: (s: chrome.downloads.FilenameSuggestion) => void
+  suggest: (s: chrome.downloads.FilenameSuggestion) => void,
 ) => {
   // Separate async processing into another function
   processDownload(item, suggest);
@@ -23,7 +22,7 @@ const handler = (
 
 const processDownload = async (
   item: chrome.downloads.DownloadItem,
-  suggest: (s: chrome.downloads.FilenameSuggestion) => void
+  suggest: (s: chrome.downloads.FilenameSuggestion) => void,
 ) => {
   try {
     // Skip if download is initiated by this extension
@@ -106,8 +105,20 @@ const processDownload = async (
   }
 };
 
-// Register download handler
-if (chrome.downloads.onDeterminingFilename.hasListener(handler)) {
-  chrome.downloads.onDeterminingFilename.removeListener(handler);
-}
-chrome.downloads.onDeterminingFilename.addListener(handler);
+// Initialize rules cache and register download handler
+(async () => {
+  try {
+    logger.info("Initializing rules cache...");
+    await initRulesCache();
+    logger.info("Rules cache initialized successfully");
+
+    // Register download handler after cache is ready
+    if (chrome.downloads.onDeterminingFilename.hasListener(handler)) {
+      chrome.downloads.onDeterminingFilename.removeListener(handler);
+    }
+    chrome.downloads.onDeterminingFilename.addListener(handler);
+    logger.info("Download handler registered");
+  } catch (e) {
+    logger.error("Failed to initialize extension:", e);
+  }
+})();

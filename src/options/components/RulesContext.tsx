@@ -6,6 +6,9 @@ import React, {
 } from "react";
 import { RulesSchema, type Rule } from "@/schemas/rules";
 import { readRules, writeRules } from "@/lib/rules/storage";
+import { createLogger } from "@/options/lib/logger";
+
+const logger = createLogger("[RulesContext]");
 
 const clone = <T,>(x: T) => JSON.parse(JSON.stringify(x)) as T;
 
@@ -41,7 +44,9 @@ export const RulesProvider: React.FC<RulesProviderProps> = ({ children }) => {
 
   useEffect(() => {
     (async () => {
+      logger.info("Loading rules from storage...");
       const loadedRules = await readRules();
+      logger.info(`Loaded ${loadedRules.length} rules`);
       setRules(loadedRules);
       setIsInitialLoad(false);
     })();
@@ -53,9 +58,10 @@ export const RulesProvider: React.FC<RulesProviderProps> = ({ children }) => {
 
     try {
       const parsed = RulesSchema.parse(rules);
-      console.log("Writing rules to storage:", parsed);
+      logger.info("Writing rules to storage:", parsed);
       writeRules(parsed);
     } catch (e) {
+      logger.error("Failed to save rules:", e);
       const message = e instanceof Error ? e.message : String(e);
       alert("Cannot save (Invalid JSON or schema) \n" + message);
     }
@@ -66,9 +72,12 @@ export const RulesProvider: React.FC<RulesProviderProps> = ({ children }) => {
     const next = clone(rules);
     const r = next.find((x) => x.id === id);
     if (!r) {
-      console.error(`Rule with id ${id} not found`);
+      logger.error(`Rule with id ${id} not found`);
       return;
     }
+    logger.info(
+      `Toggling rule "${r.name}" (${id}): ${r.enabled} → ${!r.enabled}`,
+    );
     r.enabled = !r.enabled;
     setRules(next);
   };
@@ -76,14 +85,16 @@ export const RulesProvider: React.FC<RulesProviderProps> = ({ children }) => {
   // add rule
   const addRule = async () => {
     const next = clone(rules);
+    const newRuleId = `r-${Date.now()}`;
     next.push({
-      id: `r-${Date.now()}`,
+      id: newRuleId,
       name: "New Rule",
       enabled: true,
       domains: ["*"],
       conditions: [],
       actions: { pathTemplate: "{host}/{file}", conflict: "uniquify" },
     });
+    logger.info(`Adding new rule with id ${newRuleId}`);
     setRules(next);
   };
 
@@ -92,9 +103,10 @@ export const RulesProvider: React.FC<RulesProviderProps> = ({ children }) => {
     const next = clone(rules);
     const index = next.findIndex((r) => r.id === id);
     if (index === -1) {
-      console.error(`Rule with id ${id} not found`);
+      logger.error(`Rule with id ${id} not found`);
       return;
     }
+    logger.debug(`Updating rule "${next[index].name}" (${id})`);
     next[index] = { ...next[index], ...updatedRule };
     setRules(next);
   };
@@ -102,26 +114,36 @@ export const RulesProvider: React.FC<RulesProviderProps> = ({ children }) => {
   // delete rule
   const removeRule = async (id: string) => {
     const next = clone(rules);
+    const rule = rules.find((r) => r.id === id);
+    if (rule) {
+      logger.info(`Removing rule "${rule.name}" (${id})`);
+    }
     setRules(next.filter((r) => r.id !== id));
   };
 
   // reorder rules
   const reorderRules = async (rules: Rule[]) => {
+    logger.info("Reordering rules");
     setRules(rules);
   };
 
   // Export - returns the current rules as JSON
   const exportToJson = async () => {
+    logger.info("Exporting rules to JSON");
     const latestRules = await readRules();
+    logger.info(`Exported ${latestRules.length} rules`);
     return latestRules;
   };
 
   // Import - takes parsed rules array and sets it as the current rules
   const importFromJson = (rules: Rule[]) => {
     try {
+      logger.info(`Importing ${rules.length} rules from JSON`);
       const parsed = RulesSchema.parse(rules);
       setRules(parsed);
+      logger.info("Successfully imported rules");
     } catch (e) {
+      logger.error("Failed to import rules:", e);
       const message = e instanceof Error ? e.message : String(e);
       alert("Cannot import rules (Invalid format or schema)\n" + message);
     }
