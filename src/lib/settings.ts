@@ -1,7 +1,8 @@
 import { getSync, setSync } from "@/lib/storage";
+import type { ConflictAction } from "@/schemas/rules";
+export type { ConflictAction } from "@/schemas/rules";
 
 export type Theme = "light" | "dark" | "system";
-export type ConflictAction = "uniquify" | "overwrite" | "prompt";
 
 export interface AppSettings {
   showToastNotifications: boolean;

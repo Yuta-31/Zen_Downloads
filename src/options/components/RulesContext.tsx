@@ -92,7 +92,7 @@ export const RulesProvider: React.FC<RulesProviderProps> = ({ children }) => {
       enabled: true,
       domains: ["*"],
       conditions: [],
-      actions: { pathTemplate: "{host}/{file}" },
+      actions: { pathTemplate: "{host}/{file}", conflictAction: undefined },
     });
     logger.info(`Adding new rule with id ${newRuleId}`);
     setRules(next);

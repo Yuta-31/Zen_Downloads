@@ -33,10 +33,7 @@ export const SettingsCard = () => {
     logger.info("Loading settings...");
     getSettings().then((loadedSettings) => {
       logger.info("Settings loaded:", loadedSettings);
-      logger.info(
-        "defaultConflictAction:",
-        loadedSettings.defaultConflictAction,
-      );
+
       setSettings(loadedSettings);
     });
   }, []);
