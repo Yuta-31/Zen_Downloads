@@ -1,5 +1,6 @@
 import { initRulesCache } from "@/background/lib/cache";
 import { createLogger } from "@/background/lib/logger";
+import { getSettings } from "@/lib/settings";
 import { attachMessageListeners } from "./lib/message";
 import { getActiveTabUrl } from "./lib/tabUrl";
 import { findMatchingRule } from "./lib/ruleMatcher";
@@ -62,11 +63,18 @@ const processDownload = async (
       referrer,
     });
 
+    // Get settings to determine conflict action
+    const settings = await getSettings();
+
+    // Use rule's conflict action if specified, otherwise use default from settings
+    const conflictAction =
+      rule.actions.conflict || settings.defaultConflictAction;
+
     // Suggest the new filename to Chrome
     logger.info("Suggesting filename to Chrome...");
     const suggestion: chrome.downloads.FilenameSuggestion = {
       filename: newPath,
-      conflictAction: "uniquify",
+      conflictAction: conflictAction,
     };
     logger.debug("Suggestion object:", JSON.stringify(suggestion));
 
