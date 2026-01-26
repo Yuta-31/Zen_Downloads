@@ -22,7 +22,8 @@
     }
   ],
   "action": {
-    "default_title": "Zen Downloads"
+    "default_title": "Zen Downloads",
+    "default_popup": "popup/index.html"
   },
   "options_page": "options/index.html"
 }
