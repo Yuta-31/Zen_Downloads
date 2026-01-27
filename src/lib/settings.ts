@@ -7,12 +7,14 @@ export type Theme = "light" | "dark" | "system";
 export interface AppSettings {
   showToastNotifications: boolean;
   theme: Theme;
+  isPaused: boolean;
   defaultConflictAction: ConflictAction;
 }
 
 const DEFAULTS: AppSettings = {
   showToastNotifications: true,
   theme: "system",
+  isPaused: false,
   defaultConflictAction: "uniquify",
 };
 
@@ -33,6 +35,7 @@ export const watchSettings = (
     if (
       changes.showToastNotifications ||
       changes.theme ||
+      changes.isPaused ||
       changes.defaultConflictAction
     ) {
       getSettings().then(callback);

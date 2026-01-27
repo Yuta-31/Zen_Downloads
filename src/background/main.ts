@@ -26,6 +26,14 @@ const processDownload = async (
   suggest: (s: chrome.downloads.FilenameSuggestion) => void,
 ) => {
   try {
+    // Check if extension is paused
+    const settings = await getSettings();
+
+    if (settings.isPaused) {
+      logger.info("Extension is paused, skipping download organization");
+      return;
+    }
+
     // Skip if download is initiated by this extension
     if (item.byExtensionId === chrome.runtime.id) return;
 

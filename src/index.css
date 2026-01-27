@@ -48,6 +48,15 @@
 :root {
   --radius: 0.625rem;
   --background: oklch(0.985 0.004 106.42); /* Light gray-blue */
+  /* Teal glow colors for zen toggle */
+  --teal: #14b8a6;
+  --teal-glow: rgba(20, 184, 166, 0.4);
+  --teal-dim: rgba(20, 184, 166, 0.15);
+  /* Paused button colors */
+  --paused-bg-start: #a8a8a8;
+  --paused-bg-end: #8a8a8a;
+  --paused-shadow: rgba(0, 0, 0, 0.15);
+  --paused-icon-color: rgba(255, 255, 255, 0.85);
   --foreground: oklch(0.205 0 0);
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.205 0 0);
@@ -81,6 +90,11 @@
 }
 
 .dark {
+  /* Paused button colors for dark theme */
+  --paused-bg-start: #2a2a2a;
+  --paused-bg-end: #1f1f1f;
+  --paused-shadow: rgba(0, 0, 0, 0.4);
+  --paused-icon-color: rgba(255, 255, 255, 0.6);
   --background: oklch(0.156 0.024 237.31); /* #0F172A Deep Slate */
   --foreground: oklch(0.985 0 0);
   --card: oklch(0.227 0.026 244.73); /* #1E293B Surface */

@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Zen Downloads",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "Restore order to your downloads. Automatically route files into folders with flexible rules. 100% Private & Open Source.",
   "icons": {
     "128": "icon128.png",
@@ -22,7 +22,8 @@
     }
   ],
   "action": {
-    "default_title": "Zen Downloads"
+    "default_title": "Zen Downloads",
+    "default_popup": "popup/index.html"
   },
   "options_page": "options/index.html"
 }

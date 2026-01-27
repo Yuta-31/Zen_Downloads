@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Sun, Moon, Monitor } from "lucide-react";
+import { Sun, Moon, Monitor, Play, Pause } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 import {
@@ -25,7 +25,8 @@ export const SettingsCard = () => {
   const [settings, setSettings] = useState<AppSettings>({
     showToastNotifications: true,
     theme: "system",
-    defaultConflictAction: "uniquify",
+    isPaused: false,
+    defaultConflictAction: "uniquify" as ConflictAction,
   });
   const { theme, setTheme } = useTheme();
 
@@ -51,6 +52,13 @@ export const SettingsCard = () => {
     setSettings((prev) => ({ ...prev, theme: newTheme }));
   };
 
+  const handleTogglePause = async (checked: boolean) => {
+    logger.info(`Toggling pause state: ${checked}`);
+    const newSettings = { ...settings, isPaused: checked };
+    setSettings(newSettings);
+    await updateSettings({ isPaused: checked });
+  };
+
   const handleConflictActionChange = async (value: string) => {
     logger.info(`Changing default conflict action to: ${value}`);
     const action = value as ConflictAction;
@@ -63,6 +71,34 @@ export const SettingsCard = () => {
 
   return (
     <div className="space-y-6 py-4">
+      {/* Global Toggle Section */}
+      <div className="space-y-4">
+        <h3 className="text-sm font-semibold">Extension Status</h3>
+        <div className="flex items-center justify-between py-2">
+          <div className="space-y-0.5 flex-1">
+            <div className="flex items-center gap-2">
+              {settings.isPaused ? (
+                <Pause className="h-4 w-4 text-orange-500" />
+              ) : (
+                <Play className="h-4 w-4 text-green-500" />
+              )}
+              <label className="text-sm font-medium">
+                {settings.isPaused ? "Paused" : "Active"}
+              </label>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              {settings.isPaused
+                ? "Downloads use default Chrome behavior"
+                : "Downloads are organized by rules"}
+            </p>
+          </div>
+          <Switch
+            checked={!settings.isPaused}
+            onCheckedChange={(checked) => handleTogglePause(!checked)}
+          />
+        </div>
+      </div>
+
       {/* Theme Section */}
       <div className="space-y-4">
         <h3 className="text-sm font-semibold">Appearance</h3>
