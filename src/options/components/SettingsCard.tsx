@@ -3,10 +3,18 @@ import { Sun, Moon, Monitor, Play, Pause } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
   getSettings,
   updateSettings,
   type AppSettings,
   type Theme,
+  type ConflictAction,
 } from "@/lib/settings";
 import { useTheme } from "@/options/hooks/useTheme";
 import { createLogger } from "@/options/lib/logger";
@@ -18,14 +26,16 @@ export const SettingsCard = () => {
     showToastNotifications: true,
     theme: "system",
     isPaused: false,
+    defaultConflictAction: "uniquify" as ConflictAction,
   });
   const { theme, setTheme } = useTheme();
 
   useEffect(() => {
     logger.info("Loading settings...");
-    getSettings().then((settings) => {
-      logger.info("Settings loaded:", settings);
-      setSettings(settings);
+    getSettings().then((loadedSettings) => {
+      logger.info("Settings loaded:", loadedSettings);
+
+      setSettings(loadedSettings);
     });
   }, []);
 
@@ -47,6 +57,16 @@ export const SettingsCard = () => {
     const newSettings = { ...settings, isPaused: checked };
     setSettings(newSettings);
     await updateSettings({ isPaused: checked });
+  };
+
+  const handleConflictActionChange = async (value: string) => {
+    logger.info(`Changing default conflict action to: ${value}`);
+    const action = value as ConflictAction;
+    const newSettings = { ...settings, defaultConflictAction: action };
+    logger.info("New settings:", newSettings);
+    setSettings(newSettings);
+    await updateSettings(newSettings);
+    logger.info("Settings updated successfully");
   };
 
   return (
@@ -116,6 +136,36 @@ export const SettingsCard = () => {
               System
             </Button>
           </div>
+        </div>
+      </div>
+
+      {/* Downloads Section */}
+      <div className="space-y-4">
+        <h3 className="text-sm font-semibold">Downloads</h3>
+        <div className="space-y-2">
+          <label htmlFor="conflict-action" className="text-sm font-medium">
+            Default Conflict Action
+          </label>
+          <p className="text-xs text-muted-foreground">
+            What to do when a file with the same name already exists
+          </p>
+          <Select
+            value={settings.defaultConflictAction}
+            onValueChange={handleConflictActionChange}
+          >
+            <SelectTrigger id="conflict-action" className="w-full">
+              <SelectValue placeholder="Select action" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="uniquify">
+                Uniquify - Add (1), (2)... to filename
+              </SelectItem>
+              <SelectItem value="overwrite">
+                Overwrite - Replace existing file
+              </SelectItem>
+              <SelectItem value="prompt">Prompt - Ask me what to do</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
       </div>
 

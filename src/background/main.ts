@@ -28,6 +28,8 @@ const processDownload = async (
   try {
     // Check if extension is paused
     const settings = await getSettings();
+    logger.info("Loaded settings:", settings);
+    logger.info("Default conflict action:", settings.defaultConflictAction);
 
     if (settings.isPaused) {
       logger.info("Extension is paused, skipping download organization");
@@ -63,6 +65,7 @@ const processDownload = async (
     });
 
     if (!rule) return;
+    logger.info("Rule conflict action:", rule.actions.conflict);
 
     // Build the download path
     const newPath = buildDownloadPath(rule, {
@@ -71,11 +74,16 @@ const processDownload = async (
       referrer,
     });
 
+    // Use rule's conflict action if specified, otherwise use default from settings
+    const conflictAction =
+      rule.actions.conflict ?? settings.defaultConflictAction;
+    logger.info("Final conflict action:", conflictAction);
+
     // Suggest the new filename to Chrome
     logger.info("Suggesting filename to Chrome...");
     const suggestion: chrome.downloads.FilenameSuggestion = {
       filename: newPath,
-      conflictAction: "uniquify",
+      conflictAction: conflictAction,
     };
     logger.debug("Suggestion object:", JSON.stringify(suggestion));
 

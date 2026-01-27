@@ -35,7 +35,7 @@ export const RuleConditionSchema = z.union([
 export const RuleActionSchema = z.object({
   pathTemplate: z.string().min(1),
   conflict: ConflictActionSchema.optional(),
-  transfomrs: z
+  transforms: z
     .array(z.enum(["lower-ext", "upper-ext", "sanitize-file", "normalize-nfc"]))
     .optional(),
 });
@@ -60,3 +60,4 @@ export const RulesSchema = z.array(RuleSchema);
 export type RulesConfig = z.infer<typeof RulesConfigSchema>;
 export type RuleCondition = z.infer<typeof RuleConditionSchema>;
 export type Rule = z.infer<typeof RuleSchema>;
+export type ConflictAction = z.infer<typeof ConflictActionSchema>;
