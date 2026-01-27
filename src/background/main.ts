@@ -28,6 +28,8 @@ const processDownload = async (
   try {
     // Check if extension is paused
     const settings = await getSettings();
+    logger.info("Loaded settings:", settings);
+    logger.info("Default conflict action:", settings.defaultConflictAction);
 
     if (settings.isPaused) {
       logger.info("Extension is paused, skipping download organization");
@@ -63,6 +65,7 @@ const processDownload = async (
     });
 
     if (!rule) return;
+    logger.info("Rule conflict action:", rule.actions.conflict);
 
     // Build the download path
     const newPath = buildDownloadPath(rule, {
@@ -70,12 +73,6 @@ const processDownload = async (
       filename: item.filename,
       referrer,
     });
-
-    // Get settings to determine conflict action
-    const settings = await getSettings();
-    logger.info("Loaded settings:", settings);
-    logger.info("Rule conflict action:", rule.actions.conflict);
-    logger.info("Default conflict action:", settings.defaultConflictAction);
 
     // Use rule's conflict action if specified, otherwise use default from settings
     const conflictAction =
