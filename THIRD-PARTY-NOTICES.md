@@ -485,5 +485,5 @@
 [xmlchars@2.2.0](https://github.com/lddubeau/xmlchars) - MIT
 [yallist@3.1.1](https://github.com/isaacs/yallist) - ISC
 [yocto-queue@0.1.0](https://github.com/sindresorhus/yocto-queue) - MIT
-[zen-downloads@1.1.0](undefined) - UNLICENSED
+[zen-downloads@1.2.0](undefined) - UNLICENSED
 [zod@4.3.5](https://github.com/colinhacks/zod) - MIT

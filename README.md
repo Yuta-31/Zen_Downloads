@@ -1,6 +1,6 @@
 # Zen Downloads
 
-![Version](https://img.shields.io/badge/version-1.1.0-blue.svg)
+![Version](https://img.shields.io/badge/version-1.2.0-blue.svg)
 ![License](https://img.shields.io/badge/license-MIT-green.svg)
 ![Chrome](https://img.shields.io/badge/chrome-extension-orange.svg)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue.svg)
@@ -184,6 +184,22 @@ The UI follows the shadcn/ui approach:
 When adding components, mirror existing patterns (e.g., [Button](src/components/ui/button.tsx)) and export both the component and its variants for reuse.
 
 ## Changelog
+
+### Version 1.2.0 (2026-01-27)
+
+**New Features:**
+- Added pause/resume functionality via popup UI
+- Display active rules for the current page in popup
+- Added conflict resolution settings with enhanced selection UI
+- Enhanced rule configuration with conflict resolution options
+
+**UI Enhancements:**
+- New popup interface with breathing glow effects and elegant toggle button
+- Smooth state transitions between active and paused modes
+
+**User Experience:**
+- Quick access to pause download organization without opening settings
+- Visual feedback showing which rules apply to the current site
 
 ### Version 1.1.0 (2026-01-26)
 
