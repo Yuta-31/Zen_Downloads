@@ -41,6 +41,10 @@
 [@eslint/object-schema@2.1.7](https://github.com/eslint/rewrite) - Apache-2.0
 [@eslint/plugin-kit@0.4.1](https://github.com/eslint/rewrite) - Apache-2.0
 [@exodus/bytes@1.8.0](https://github.com/ExodusOSS/bytes) - MIT
+[@floating-ui/core@1.7.3](https://github.com/floating-ui/floating-ui) - MIT
+[@floating-ui/dom@1.7.4](https://github.com/floating-ui/floating-ui) - MIT
+[@floating-ui/react-dom@2.1.6](https://github.com/floating-ui/floating-ui) - MIT
+[@floating-ui/utils@0.2.10](https://github.com/floating-ui/floating-ui) - MIT
 [@humanfs/core@0.19.1](https://github.com/humanwhocodes/humanfs) - Apache-2.0
 [@humanfs/node@0.16.7](https://github.com/humanwhocodes/humanfs) - Apache-2.0
 [@humanwhocodes/module-importer@1.0.1](https://github.com/humanwhocodes/module-importer) - Apache-2.0
@@ -52,9 +56,11 @@
 [@jridgewell/trace-mapping@0.3.31](https://github.com/jridgewell/sourcemaps) - MIT
 [@napi-rs/wasm-runtime@0.2.12](https://github.com/napi-rs/napi-rs) - MIT
 [@polka/url@1.0.0-next.29](https://github.com/lukeed/polka) - MIT
+[@radix-ui/number@1.1.1](https://github.com/radix-ui/primitives) - MIT
 [@radix-ui/primitive@1.1.3](https://github.com/radix-ui/primitives) - MIT
 [@radix-ui/react-accordion@1.2.12](https://github.com/radix-ui/primitives) - MIT
 [@radix-ui/react-alert-dialog@1.1.15](https://github.com/radix-ui/primitives) - MIT
+[@radix-ui/react-arrow@1.1.7](https://github.com/radix-ui/primitives) - MIT
 [@radix-ui/react-collapsible@1.1.12](https://github.com/radix-ui/primitives) - MIT
 [@radix-ui/react-collection@1.1.7](https://github.com/radix-ui/primitives) - MIT
 [@radix-ui/react-compose-refs@1.1.2](https://github.com/radix-ui/primitives) - MIT
@@ -65,9 +71,11 @@
 [@radix-ui/react-focus-guards@1.1.3](https://github.com/radix-ui/primitives) - MIT
 [@radix-ui/react-focus-scope@1.1.7](https://github.com/radix-ui/primitives) - MIT
 [@radix-ui/react-id@1.1.1](https://github.com/radix-ui/primitives) - MIT
+[@radix-ui/react-popper@1.2.8](https://github.com/radix-ui/primitives) - MIT
 [@radix-ui/react-portal@1.1.9](https://github.com/radix-ui/primitives) - MIT
 [@radix-ui/react-presence@1.1.5](https://github.com/radix-ui/primitives) - MIT
 [@radix-ui/react-primitive@2.1.3](https://github.com/radix-ui/primitives) - MIT
+[@radix-ui/react-select@2.2.6](https://github.com/radix-ui/primitives) - MIT
 [@radix-ui/react-slot@1.2.3](https://github.com/radix-ui/primitives) - MIT
 [@radix-ui/react-slot@1.2.4](https://github.com/radix-ui/primitives) - MIT
 [@radix-ui/react-switch@1.2.6](https://github.com/radix-ui/primitives) - MIT
@@ -77,7 +85,10 @@
 [@radix-ui/react-use-escape-keydown@1.1.1](https://github.com/radix-ui/primitives) - MIT
 [@radix-ui/react-use-layout-effect@1.1.1](https://github.com/radix-ui/primitives) - MIT
 [@radix-ui/react-use-previous@1.1.1](https://github.com/radix-ui/primitives) - MIT
+[@radix-ui/react-use-rect@1.1.1](https://github.com/radix-ui/primitives) - MIT
 [@radix-ui/react-use-size@1.1.1](https://github.com/radix-ui/primitives) - MIT
+[@radix-ui/react-visually-hidden@1.2.3](https://github.com/radix-ui/primitives) - MIT
+[@radix-ui/rect@1.1.1](https://github.com/radix-ui/primitives) - MIT
 [@rolldown/pluginutils@1.0.0-beta.53](https://github.com/rolldown/rolldown) - MIT
 [@rollup/rollup-win32-x64-gnu@4.55.1](https://github.com/rollup/rollup) - MIT
 [@rollup/rollup-win32-x64-msvc@4.55.1](https://github.com/rollup/rollup) - MIT

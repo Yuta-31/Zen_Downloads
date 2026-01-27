@@ -27,3 +27,6 @@ appPackages
 
 # License files (auto-generated)
 THIRD-PARTY-LICENSES.json
+
+# v0 build output
+v0

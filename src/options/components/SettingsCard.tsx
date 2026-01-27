@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { Sun, Moon, Monitor, Play, Pause } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 import {
@@ -8,7 +9,6 @@ import {
   type Theme,
 } from "@/lib/settings";
 import { useTheme } from "@/options/hooks/useTheme";
-import { Sun, Moon, Monitor } from "lucide-react";
 import { createLogger } from "@/options/lib/logger";
 
 const logger = createLogger("[SettingsCard]");
@@ -18,6 +18,7 @@ export const SettingsCard = () => {
     showToastNotifications: true,
     theme: "system",
   });
+  const [isPaused, setIsPaused] = useState(false);
   const { theme, setTheme } = useTheme();
 
   useEffect(() => {
@@ -25,6 +26,12 @@ export const SettingsCard = () => {
     getSettings().then((settings) => {
       logger.info("Settings loaded:", settings);
       setSettings(settings);
+    });
+
+    // Load pause state
+    chrome.storage.local.get(["settings.isPaused"], (result) => {
+      const paused = result["settings.isPaused"] as boolean | undefined;
+      setIsPaused(paused ?? false);
     });
   }, []);
 
@@ -41,8 +48,42 @@ export const SettingsCard = () => {
     setSettings((prev) => ({ ...prev, theme: newTheme }));
   };
 
+  const handleTogglePause = async (checked: boolean) => {
+    logger.info(`Toggling pause state: ${checked}`);
+    setIsPaused(checked);
+    await chrome.storage.local.set({ "settings.isPaused": checked });
+  };
+
   return (
     <div className="space-y-6 py-4">
+      {/* Global Toggle Section */}
+      <div className="space-y-4">
+        <h3 className="text-sm font-semibold">Extension Status</h3>
+        <div className="flex items-center justify-between py-2">
+          <div className="space-y-0.5 flex-1">
+            <div className="flex items-center gap-2">
+              {isPaused ? (
+                <Pause className="h-4 w-4 text-orange-500" />
+              ) : (
+                <Play className="h-4 w-4 text-green-500" />
+              )}
+              <label className="text-sm font-medium">
+                {isPaused ? "Paused" : "Active"}
+              </label>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              {isPaused
+                ? "Downloads use default Chrome behavior"
+                : "Downloads are organized by rules"}
+            </p>
+          </div>
+          <Switch
+            checked={!isPaused}
+            onCheckedChange={(checked) => handleTogglePause(!checked)}
+          />
+        </div>
+      </div>
+
       {/* Theme Section */}
       <div className="space-y-4">
         <h3 className="text-sm font-semibold">Appearance</h3>
