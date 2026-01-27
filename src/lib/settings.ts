@@ -5,11 +5,13 @@ export type Theme = "light" | "dark" | "system";
 export interface AppSettings {
   showToastNotifications: boolean;
   theme: Theme;
+  isPaused: boolean;
 }
 
 const DEFAULTS: AppSettings = {
   showToastNotifications: true,
   theme: "system",
+  isPaused: false,
 };
 
 export const getSettings = async (): Promise<AppSettings> => {
@@ -26,7 +28,7 @@ export const watchSettings = (
   callback: (settings: AppSettings) => void,
 ): (() => void) => {
   const listener = (changes: { [k: string]: chrome.storage.StorageChange }) => {
-    if (changes.showToastNotifications || changes.theme) {
+    if (changes.showToastNotifications || changes.theme || changes.isPaused) {
       getSettings().then(callback);
     }
   };

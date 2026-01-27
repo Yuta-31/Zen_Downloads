@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { createRoot } from "react-dom/client";
 import { motion, AnimatePresence } from "framer-motion";
 import { Pause, Play, Download } from "lucide-react";
-import { getSettings, type Theme } from "@/lib/settings";
+import { getSettings, updateSettings, type Theme } from "@/lib/settings";
 import "@/index.css";
 
 const App = () => {
@@ -59,9 +59,8 @@ const App = () => {
 
   // Load initial state from storage
   useEffect(() => {
-    chrome.storage.local.get(["settings.isPaused"], (result) => {
-      const paused = result["settings.isPaused"] as boolean | undefined;
-      setIsPaused(paused ?? false);
+    getSettings().then((settings) => {
+      setIsPaused(settings.isPaused);
       setIsLoading(false);
     });
   }, []);
@@ -69,7 +68,7 @@ const App = () => {
   // Update storage when state changes
   const handleToggle = async (checked: boolean) => {
     setIsPaused(checked);
-    await chrome.storage.local.set({ "settings.isPaused": checked });
+    await updateSettings({ isPaused: checked });
   };
 
   const isActive = !isPaused;
