@@ -1,13 +1,18 @@
 import { useState, useEffect } from "react";
 import { createRoot } from "react-dom/client";
 import { motion, AnimatePresence } from "framer-motion";
-import { Pause, Play, Download } from "lucide-react";
+import { Pause, Play, Download, FileCheck } from "lucide-react";
 import { getSettings, updateSettings, type Theme } from "@/lib/settings";
+import { readRules } from "@/lib/rules/storage";
+import { isInDomain } from "@/lib/rules/engine";
+import type { Rule } from "@/schemas/rules";
 import "@/index.css";
 
 const App = () => {
   const [isPaused, setIsPaused] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [activeRules, setActiveRules] = useState<Rule[]>([]);
+  const [currentHost, setCurrentHost] = useState<string | null>(null);
 
   // Apply theme
   useEffect(() => {
@@ -65,6 +70,40 @@ const App = () => {
     });
   }, []);
 
+  // Load current tab URL and find matching rules
+  useEffect(() => {
+    const loadActiveRules = async () => {
+      try {
+        // Get current active tab
+        const [tab] = await chrome.tabs.query({
+          active: true,
+          currentWindow: true,
+        });
+
+        if (!tab?.url) {
+          setActiveRules([]);
+          return;
+        }
+
+        const url = new URL(tab.url);
+        const host = url.hostname;
+        setCurrentHost(host);
+
+        // Get all rules and filter by domain
+        const rules = await readRules();
+        const enabledRules = rules.filter(
+          (rule) => rule.enabled && isInDomain(rule.domains, host),
+        );
+
+        setActiveRules(enabledRules);
+      } catch {
+        setActiveRules([]);
+      }
+    };
+
+    loadActiveRules();
+  }, []);
+
   // Update storage when state changes
   const handleToggle = async (checked: boolean) => {
     setIsPaused(checked);
@@ -75,14 +114,14 @@ const App = () => {
 
   if (isLoading) {
     return (
-      <div className="w-72 h-80 flex items-center justify-center bg-background">
+      <div className="w-72 min-h-80 flex items-center justify-center bg-background">
         <div className="text-center text-muted-foreground">Loading...</div>
       </div>
     );
   }
 
   return (
-    <div className="w-72 h-80 bg-background flex flex-col items-center p-6">
+    <div className="w-72 min-h-80 bg-background flex flex-col items-center p-6">
       {/* Header */}
       <motion.header
         initial={{ opacity: 0, y: -10 }}
@@ -252,6 +291,74 @@ const App = () => {
             </motion.div>
           </AnimatePresence>
         </div>
+      </div>
+
+      {/* Active Rules Section - always reserve space */}
+      <div className="w-full border-t border-border pt-3 min-h-[72px]">
+        <AnimatePresence mode="wait">
+          {isActive && activeRules.length > 0 && (
+            <motion.div
+              key="rules"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+            >
+              <div className="flex items-center gap-1.5 mb-2">
+                <FileCheck className="w-3.5 h-3.5 text-muted-foreground" />
+                <span className="text-xs text-muted-foreground">
+                  Active rules
+                </span>
+              </div>
+              <div className="space-y-1.5 max-h-24 overflow-y-auto">
+                {activeRules.map((rule) => (
+                  <div
+                    key={rule.id}
+                    className="flex flex-col gap-0.5 px-2 py-1.5 bg-muted/50 rounded-md"
+                  >
+                    <div className="flex items-center gap-2">
+                      <div className="w-1.5 h-1.5 rounded-full bg-primary shrink-0" />
+                      <span className="text-xs text-foreground truncate">
+                        {rule.name}
+                      </span>
+                    </div>
+                    <span className="text-[10px] text-muted-foreground pl-3.5 truncate">
+                      → {rule.actions.pathTemplate}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </motion.div>
+          )}
+
+          {isActive && activeRules.length === 0 && currentHost && (
+            <motion.div
+              key="no-rules"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+            >
+              <p className="text-xs text-muted-foreground text-center py-2">
+                No rules configured for this site
+              </p>
+            </motion.div>
+          )}
+
+          {!isActive && (
+            <motion.div
+              key="paused"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+            >
+              <p className="text-xs text-muted-foreground text-center py-2">
+                Rules are paused
+              </p>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
 
       {/* Settings link */}
