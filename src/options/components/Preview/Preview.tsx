@@ -20,36 +20,9 @@ import { expandTemplate } from "@/lib/rules/template";
 import { useRules } from "@/options/hooks/useRules";
 import { createLogger } from "@/options/lib/logger";
 import type { Rule } from "@/schemas/rules";
+import { PATH_TEMPLATE_TOKENS } from "@/lib/constants/tokens";
 
 const logger = createLogger("[Preview]");
-
-const tokenCategories = [
-  {
-    title: "Basic",
-    tokens: [
-      { token: "{host}", desc: "Domain name" },
-      { token: "{file}", desc: "Full filename" },
-      { token: "{basename}", desc: "Without extension" },
-      { token: "{ext}", desc: "Extension only" },
-    ],
-  },
-  {
-    title: "Date",
-    tokens: [
-      { token: "{yyyy-mm-dd}", desc: "Full date" },
-      { token: "{yyyy}", desc: "Year" },
-      { token: "{mm}", desc: "Month" },
-      { token: "{dd}", desc: "Day" },
-    ],
-  },
-  {
-    title: "URL",
-    tokens: [
-      { token: "{path[0]}", desc: "First path" },
-      { token: "{query.foo}", desc: "Query param" },
-    ],
-  },
-];
 
 export const RulePreviewCard = () => {
   const [testUrl, setTestUrl] = useState("");
@@ -225,13 +198,13 @@ export const RulePreviewCard = () => {
                   className="overflow-hidden"
                 >
                   <div className="pt-4 space-y-4">
-                    {tokenCategories.map((category) => (
+                    {PATH_TEMPLATE_TOKENS.map((category) => (
                       <div key={category.title}>
                         <div className="text-[10px] font-medium text-stone-500 dark:text-zinc-600 uppercase tracking-wider mb-2">
                           {category.title}
                         </div>
                         <div className="flex flex-wrap gap-1.5">
-                          {category.tokens.map((t) => (
+                          {category.variables.map((t) => (
                             <span
                               key={t.token}
                               className="bg-stone-100 dark:bg-zinc-800 text-stone-600 dark:text-zinc-300 text-xs px-2 py-1 rounded font-mono"

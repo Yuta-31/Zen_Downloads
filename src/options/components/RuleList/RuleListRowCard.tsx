@@ -26,6 +26,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { useRulesDispatch } from "@/options/hooks/useRules";
 import { generateFilename, type FileMetadata } from "@/lib/smartRename";
+import { SMART_RENAME_VARIABLE_CHIPS } from "@/lib/constants/tokens";
 import type { Rule } from "@/schemas/rules";
 import type { ConflictAction } from "@/schemas/rules";
 
@@ -317,18 +318,6 @@ const EditableField = ({
   );
 };
 
-// Variable chips for the filename pattern
-const variableChips = [
-  { token: "{year}", desc: "4-digit year" },
-  { token: "{month}", desc: "2-digit month" },
-  { token: "{day}", desc: "2-digit day" },
-  { token: "{basename}", desc: "Filename without ext" },
-  { token: "{ext}", desc: "File extension" },
-  { token: "{original_name}", desc: "Full filename" },
-  { token: "{domain}", desc: "Full domain" },
-  { token: "{hostname}", desc: "Top-level domain" },
-];
-
 const RuleDetails = ({ rule }: RuleDetailsProps) => {
   const { updateRule } = useRulesDispatch();
   const [showVariables, setShowVariables] = useState(false);
@@ -492,7 +481,7 @@ const RuleDetails = ({ rule }: RuleDetailsProps) => {
                     className="flex flex-wrap gap-1.5 pt-1"
                     onClick={(e) => e.stopPropagation()}
                   >
-                    {variableChips.map((v) => (
+                    {SMART_RENAME_VARIABLE_CHIPS.map((v) => (
                       <button
                         key={v.token}
                         type="button"
