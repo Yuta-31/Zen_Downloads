@@ -220,6 +220,21 @@ describe("matchUnifiedCondition", () => {
       expect(matchUnifiedCondition(condition, baseCtx)).toBe(true);
     });
 
+    it("matches domain with contains when domain has prefix", () => {
+      // e.g., "examples.com" should match "file-examples.com"
+      const fileExamplesCtx = buildCtx(
+        "https://file-examples.com/downloads/file.pdf",
+        "file.pdf",
+      );
+      const condition: UnifiedCondition = {
+        conditionType: "domain",
+        matchType: "contains",
+        value: "examples.com",
+        caseSensitive: false,
+      };
+      expect(matchUnifiedCondition(condition, fileExamplesCtx)).toBe(true);
+    });
+
     it("matches domain with exact", () => {
       const condition: UnifiedCondition = {
         conditionType: "domain",
