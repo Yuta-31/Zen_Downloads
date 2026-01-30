@@ -1,19 +1,14 @@
-import { Download, Plus, Upload } from "lucide-react";
+import { Plus } from "lucide-react";
 import { LayoutGroup, Reorder, useDragControls } from "framer-motion";
 import { useState } from "react";
-import { downloadJson, pickFileAsJson } from "@/options/lib/file";
 import { useRules, useRulesDispatch } from "@/options/hooks/useRules";
+import { Button } from "@/components/ui/button";
 import RuleListRowCard from "./RuleListRowCard";
-import HoverExpandButton from "./HoverExpandButton";
 import type { Rule } from "@/schemas/rules";
-import { createLogger } from "@/options/lib/logger";
-
-const logger = createLogger("[RuleList]");
 
 const RuleList = () => {
   const { rules } = useRules();
-  const { exportToJson, importFromJson, setRules, addRule } =
-    useRulesDispatch();
+  const { setRules, addRule } = useRulesDispatch();
   const [selectedRule, setSelectedRule] = useState<Rule | null>(null);
   const [draggingRuleId, setDraggingRuleId] = useState<string | null>(null);
 
@@ -33,72 +28,28 @@ const RuleList = () => {
     }
   };
 
-  const handleDownload = async () => {
-    logger.info("Exporting rules to file...");
-    const cfg = await exportToJson();
-    downloadJson(cfg, "download-helper-rules.json");
-    logger.info("Rules exported successfully");
-  };
-
-  const handleUpload = async () => {
-    try {
-      logger.info("Importing rules from file...");
-      const file = await pickFileAsJson();
-      if (!file) {
-        logger.info("File selection cancelled");
-        return;
-      }
-      logger.info(`Reading file: ${file.name}`);
-      const text = await file.text();
-      const rules = JSON.parse(text);
-      importFromJson(rules);
-    } catch (e) {
-      logger.error("Failed to import rules from file:", e);
-      alert("Failed to import rules. Please check the file format.");
-    }
-  };
-
   return (
     <section>
-      <div className="w-full flex items-center justify-between px-2 h-12">
+      {/* Header */}
+      <div className="flex items-center justify-between mb-6">
         <div>
-          <div className="text-2xl font-bold dark:text-stone-100">
-            Rule List
-          </div>
-          <div className="text-xs text-stone-500 dark:text-stone-400 mt-0.5">
-            Rules are evaluated from top to bottom
-          </div>
-        </div>
-        <div className="flex gap-2">
-          <HoverExpandButton
-            icon={<Plus />}
-            onClick={addRule}
-            text="Add"
-            variant="default"
-          />
-          <HoverExpandButton
-            icon={<Download />}
-            onClick={handleDownload}
-            text="Download"
-          />
-          <HoverExpandButton
-            icon={<Upload />}
-            onClick={handleUpload}
-            text="Upload"
-          />
+          <h2 className="text-2xl font-semibold text-stone-800 dark:text-zinc-100">
+            Rules
+          </h2>
+          <p className="text-xs text-stone-500 dark:text-zinc-500 mt-1">
+            Evaluated from top to bottom. First match wins.
+          </p>
         </div>
       </div>
+
+      {/* Rule List */}
       <LayoutGroup>
-        <div
-          // layout
-          className="p-4 rounded-md shadow-inner bg-stone-200 dark:bg-slate-800 grid grid-cols-1 gap-1"
-          // transition={{ layout: { duration: 0.3, ease: "easeInOut" } }}
-        >
+        <div className="space-y-4">
           <Reorder.Group
             axis="y"
             values={rules}
             onReorder={handleReorder}
-            className="grid grid-cols-1 gap-1"
+            className="space-y-4"
           >
             {rules.map((rule) => (
               <RuleReorderItem
@@ -113,6 +64,23 @@ const RuleList = () => {
               />
             ))}
           </Reorder.Group>
+
+          {/* Empty State */}
+          {rules.length === 0 && (
+            <div className="text-center py-12 border border-dashed border-stone-300 dark:border-zinc-800 rounded-xl bg-white dark:bg-transparent">
+              <p className="text-stone-500 dark:text-zinc-500 mb-4">
+                No rules configured yet
+              </p>
+              <Button
+                size="sm"
+                onClick={addRule}
+                className="bg-teal-600 hover:bg-teal-500 text-white"
+              >
+                <Plus className="w-4 h-4 mr-1.5" />
+                Create your first rule
+              </Button>
+            </div>
+          )}
         </div>
       </LayoutGroup>
     </section>

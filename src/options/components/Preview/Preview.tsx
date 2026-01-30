@@ -1,14 +1,15 @@
-import { Link2, FileText, Wand2, FolderOutput } from "lucide-react";
-import { useState, useEffect } from "react";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
 import {
-  Accordion,
-  AccordionItem,
-  AccordionTrigger,
-  AccordionContent,
-} from "@/components/ui/accordion";
+  Link2,
+  FileText,
+  Wand2,
+  FolderOutput,
+  ChevronDown,
+  ChevronUp,
+} from "lucide-react";
+import { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Card } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import {
   buildCtx,
   isInDomain,
@@ -26,29 +27,26 @@ const tokenCategories = [
   {
     title: "Basic",
     tokens: [
-      { token: "{host}", desc: "Domain name (e.g., example.com)" },
-      { token: "{file}", desc: "Full filename with extension" },
-      { token: "{basename}", desc: "Filename without extension" },
-      { token: "{ext}", desc: "File extension (e.g., pdf)" },
+      { token: "{host}", desc: "Domain name" },
+      { token: "{file}", desc: "Full filename" },
+      { token: "{basename}", desc: "Without extension" },
+      { token: "{ext}", desc: "Extension only" },
     ],
   },
   {
-    title: "Date & Time",
+    title: "Date",
     tokens: [
-      { token: "{yyyy-mm-dd}", desc: "Current date (e.g., 2026-01-06)" },
-      { token: "{yyyy}", desc: "Year (e.g., 2026)" },
-      { token: "{mm}", desc: "Month (e.g., 01)" },
-      { token: "{dd}", desc: "Day (e.g., 06)" },
+      { token: "{yyyy-mm-dd}", desc: "Full date" },
+      { token: "{yyyy}", desc: "Year" },
+      { token: "{mm}", desc: "Month" },
+      { token: "{dd}", desc: "Day" },
     ],
   },
   {
-    title: "URL Parts",
+    title: "URL",
     tokens: [
-      { token: "{path[0]}", desc: "First path segment" },
-      { token: "{path[1]}", desc: "Second path segment" },
-      { token: "{query.foo}", desc: "Query parameter value (foo)" },
-      { token: "{referrer.host}", desc: "Referrer domain" },
-      { token: "{referrer.query.bar}", desc: "Referrer query parameter (bar)" },
+      { token: "{path[0]}", desc: "First path" },
+      { token: "{query.foo}", desc: "Query param" },
     ],
   },
 ];
@@ -58,6 +56,7 @@ export const RulePreviewCard = () => {
   const [previewCtx, setPreviewCtx] = useState<EvalCtx | null>(null);
   const [matchedRule, setMatchedRule] = useState<Rule | null>(null);
   const [savePath, setSavePath] = useState<string | null>(null);
+  const [showTokens, setShowTokens] = useState(false);
   const { rules } = useRules();
 
   // Update preview when rule or test URL changes
@@ -66,7 +65,6 @@ export const RulePreviewCard = () => {
       try {
         logger.debug("Test URL changed:", testUrl);
 
-        // Validate URL before processing
         if (!testUrl || testUrl.trim() === "") {
           logger.debug("Empty URL, showing default preview");
           setPreviewCtx(null);
@@ -75,13 +73,11 @@ export const RulePreviewCard = () => {
           return;
         }
 
-        // Check if URL is valid
         try {
           new URL(testUrl);
         } catch (e) {
           logger.debug("Invalid URL format, skipping preview update");
           logger.error(e);
-          // Don't clear the preview, just skip the update
           return;
         }
 
@@ -135,157 +131,125 @@ export const RulePreviewCard = () => {
   }, [testUrl, rules]);
 
   return (
-    <Accordion type="single" collapsible defaultValue="preview">
-      <AccordionItem value="preview" className="border-none">
-        {/* Make entire card triggerable */}
-        <Card className="bg-stone-50/70 dark:bg-slate-800/50 shadow-inner border-stone-200 dark:border-slate-700 pb-0 pt-2">
-          <AccordionTrigger className="hover:no-underline pr-6 cursor-pointer">
-            <CardHeader className="w-full">
-              <div className="flex items-center justify-between">
-                <CardTitle className="text-sm font-semibold text-stone-700 dark:text-stone-200">
-                  Preview
-                </CardTitle>
+    <div className="space-y-6">
+      <div>
+        <h2 className="text-2xl font-semibold text-stone-800 dark:text-zinc-100">
+          Preview
+        </h2>
+        <p className="text-xs text-stone-500 dark:text-zinc-500 mt-1">
+          Test your rules with any URL
+        </p>
+      </div>
+
+      <Card className="bg-white dark:bg-zinc-900/50 border-stone-200 dark:border-zinc-800 p-6 shadow-sm dark:shadow-none">
+        <div className="space-y-6">
+          {/* URL Input */}
+          <div className="space-y-2">
+            <label className="text-xs font-medium text-stone-500 dark:text-zinc-500 uppercase tracking-wider flex items-center gap-2">
+              <Link2 className="w-3.5 h-3.5" />
+              Test URL
+            </label>
+            <Input
+              value={testUrl}
+              onChange={(e) => setTestUrl(e.target.value)}
+              placeholder="https://example.com/files/document.pdf"
+              className="bg-white dark:bg-zinc-950 border-stone-300 dark:border-zinc-700 rounded-md text-stone-800 dark:text-zinc-100 focus-visible:ring-1 focus-visible:ring-teal-500 focus-visible:border-teal-500"
+            />
+          </div>
+
+          {/* Inferred File */}
+          {previewCtx && (
+            <div className="space-y-2">
+              <label className="text-xs font-medium text-stone-500 dark:text-zinc-500 uppercase tracking-wider flex items-center gap-2">
+                <FileText className="w-3.5 h-3.5" />
+                Detected File
+              </label>
+              <div className="font-mono text-sm text-stone-700 dark:text-zinc-300">
+                {previewCtx.file}
               </div>
-            </CardHeader>
-          </AccordionTrigger>
+            </div>
+          )}
 
-          <AccordionContent className="p-0">
-            <CardContent className="space-y-4 text-sm pt-0 pb-4">
-              {/* Section A: Input */}
-              <section className="space-y-3">
-                <div className="flex items-start gap-2">
-                  <Link2 className="w-4 h-4 mt-0.5 text-stone-500 dark:text-stone-400" />
-                  <div className="min-w-0 flex-1 space-y-1">
-                    <div className="text-xs text-stone-500 dark:text-stone-400">
-                      Test URL
-                    </div>
-                    <Input
-                      value={testUrl}
-                      onChange={(e) => {
-                        setTestUrl(e.target.value);
-                      }}
-                      placeholder="https://file-examples.com/storage/fe8f4c5/file-example_DOCX_500kB.docx"
-                      className="h-9 bg-white/70 dark:bg-slate-700"
-                    />
-                    <div className="text-[11px] text-stone-400 dark:text-stone-500">
-                      Paste any URL to preview the matched rule and output path.
-                    </div>
-                  </div>
-                </div>
+          {/* Matched Rule */}
+          <div className="space-y-2">
+            <label className="text-xs font-medium text-stone-500 dark:text-zinc-500 uppercase tracking-wider flex items-center gap-2">
+              <Wand2 className="w-3.5 h-3.5" />
+              Matched Rule
+            </label>
+            {matchedRule ? (
+              <span className="inline-block bg-teal-100 dark:bg-teal-900/50 text-teal-700 dark:text-teal-400 text-xs px-2.5 py-1 rounded-full border border-teal-300 dark:border-teal-800">
+                {matchedRule.name}
+              </span>
+            ) : (
+              <span className="text-stone-400 dark:text-zinc-600 text-sm">
+                No match
+              </span>
+            )}
+          </div>
 
-                <div className="flex items-start gap-2">
-                  <FileText className="w-4 h-4 mt-0.5 text-stone-500 dark:text-stone-400" />
-                  <div className="min-w-0 flex-1">
-                    <div className="text-xs text-stone-500 dark:text-stone-400 mb-0.5">
-                      Inferred file name (fallback to URL tail)
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <div className="font-semibold text-stone-900 dark:text-stone-100 truncate">
-                        {previewCtx?.file}
-                      </div>
-                    </div>
-                    <div className="text-[11px] text-stone-400 dark:text-stone-500 mt-1">
-                      ⓘ Actual downloads may use a different filename provided
-                      by the server.
-                    </div>
-                  </div>
-                </div>
-              </section>
+          {/* Save Path */}
+          <div className="space-y-2">
+            <label className="text-xs font-medium text-stone-500 dark:text-zinc-500 uppercase tracking-wider flex items-center gap-2">
+              <FolderOutput className="w-3.5 h-3.5" />
+              Output Path
+            </label>
+            <div className="px-3 py-2 bg-stone-50 dark:bg-zinc-950 border border-stone-200 dark:border-zinc-800 rounded-md">
+              <div className="font-mono text-sm text-teal-600 dark:text-teal-400/80 break-all">
+                Downloads/{savePath || "{file}"}
+              </div>
+            </div>
+          </div>
 
-              <hr className="border-stone-200 dark:border-slate-700" />
+          {/* Token Reference */}
+          <div className="border-t border-stone-200 dark:border-zinc-800 pt-4">
+            <button
+              type="button"
+              onClick={() => setShowTokens(!showTokens)}
+              className="flex items-center gap-2 text-xs text-stone-500 dark:text-zinc-500 hover:text-teal-600 dark:hover:text-teal-400 transition-colors w-full"
+            >
+              {showTokens ? (
+                <ChevronUp className="w-3.5 h-3.5" />
+              ) : (
+                <ChevronDown className="w-3.5 h-3.5" />
+              )}
+              Available template tokens
+            </button>
 
-              {/* Section B: Matched rule */}
-              <section className="space-y-2">
-                <div className="flex items-center gap-2">
-                  <Wand2 className="w-4 h-4 text-stone-500 dark:text-stone-400" />
-                  <div className="text-xs text-stone-500 dark:text-stone-400">
-                    Matched rule
-                  </div>
-                </div>
-
-                {matchedRule ? (
-                  <Badge className="bg-stone-200 dark:bg-slate-700 text-stone-800 dark:text-stone-200 hover:bg-stone-200 dark:hover:bg-slate-700">
-                    {matchedRule.name}
-                  </Badge>
-                ) : (
-                  <div className="text-stone-500 dark:text-stone-400">None</div>
-                )}
-                <div className="rounded-md bg-stone-100 dark:bg-slate-700 border border-stone-200 dark:border-slate-600 px-3 py-2 font-mono text-xs text-stone-800 dark:text-stone-200 whitespace-pre-wrap">
-                  {matchedRule?.actions.pathTemplate}
-                </div>
-              </section>
-
-              <hr className="border-stone-200 dark:border-slate-700" />
-
-              {/* Section C: Final path */}
-              <section className="space-y-2">
-                <div className="flex items-center gap-2">
-                  <FolderOutput className="w-4 h-4 text-stone-500 dark:text-stone-400" />
-                  <div className="text-xs text-stone-500 dark:text-stone-400">
-                    Final path
-                  </div>
-                </div>
-
-                {savePath ? (
-                  <>
-                    <div className="rounded-md bg-stone-900 dark:bg-slate-950 text-stone-50 dark:text-stone-100 px-3 py-2 font-mono text-xs break-all">
-                      <span className="text-stone-400 dark:text-stone-500">
-                        Downloads/
-                      </span>
-                      {savePath}
-                    </div>
-                    <div className="text-[11px] text-stone-400 dark:text-stone-500">
-                      ⓘ Actual downloads may use a different filename provided
-                      by the server.
-                    </div>
-                  </>
-                ) : (
-                  <div className="text-stone-500 dark:text-stone-400">—</div>
-                )}
-              </section>
-
-              {/* Section D: Tokens help */}
-              <Accordion type="single" collapsible className="pt-1">
-                <AccordionItem value="tokens">
-                  <AccordionTrigger className="text-xs text-stone-600 dark:text-stone-300">
-                    Available tokens
-                  </AccordionTrigger>
-                  <AccordionContent>
-                    <div className="space-y-3">
-                      <div className="text-xs text-stone-600 dark:text-stone-300 bg-stone-50 dark:bg-slate-700 border border-stone-200 dark:border-slate-600 rounded px-2 py-1.5">
-                        💡 All tokens are automatically sanitized to remove
-                        invalid filename characters.
-                      </div>
-                      {tokenCategories.map((category) => (
-                        <div key={category.title}>
-                          <div className="text-[11px] font-semibold text-stone-500 dark:text-stone-400 mb-1.5">
-                            {category.title}
-                          </div>
-                          <div className="space-y-1">
-                            {category.tokens.map((item) => (
-                              <div
-                                key={item.token}
-                                className="flex items-baseline gap-2"
-                              >
-                                <code className="text-xs font-mono text-blue-600 dark:text-teal-400 bg-blue-50 dark:bg-slate-800 px-1.5 py-0.5 rounded">
-                                  {item.token}
-                                </code>
-                                <span className="text-xs text-stone-600 dark:text-stone-400">
-                                  {item.desc}
-                                </span>
-                              </div>
-                            ))}
-                          </div>
+            <AnimatePresence>
+              {showTokens && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: "auto" }}
+                  exit={{ opacity: 0, height: 0 }}
+                  transition={{ duration: 0.15 }}
+                  className="overflow-hidden"
+                >
+                  <div className="pt-4 space-y-4">
+                    {tokenCategories.map((category) => (
+                      <div key={category.title}>
+                        <div className="text-[10px] font-medium text-stone-500 dark:text-zinc-600 uppercase tracking-wider mb-2">
+                          {category.title}
                         </div>
-                      ))}
-                    </div>
-                  </AccordionContent>
-                </AccordionItem>
-              </Accordion>
-            </CardContent>
-          </AccordionContent>
-        </Card>
-      </AccordionItem>
-    </Accordion>
+                        <div className="flex flex-wrap gap-1.5">
+                          {category.tokens.map((t) => (
+                            <span
+                              key={t.token}
+                              className="bg-stone-100 dark:bg-zinc-800 text-stone-600 dark:text-zinc-300 text-xs px-2 py-1 rounded font-mono"
+                              title={t.desc}
+                            >
+                              {t.token}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+        </div>
+      </Card>
+    </div>
   );
 };

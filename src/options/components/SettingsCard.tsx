@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
-import { Sun, Moon, Monitor, Play, Pause } from "lucide-react";
-import { Switch } from "@/components/ui/switch";
+import { Sun, Moon, Monitor, Pause, Play } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Switch } from "@/components/ui/switch";
 import {
   Select,
   SelectContent,
@@ -34,7 +34,6 @@ export const SettingsCard = () => {
     logger.info("Loading settings...");
     getSettings().then((loadedSettings) => {
       logger.info("Settings loaded:", loadedSettings);
-
       setSettings(loadedSettings);
     });
   }, []);
@@ -70,48 +69,56 @@ export const SettingsCard = () => {
   };
 
   return (
-    <div className="space-y-6 py-4">
-      {/* Global Toggle Section */}
+    <div className="py-6 space-y-8">
+      {/* Status Section */}
       <div className="space-y-4">
-        <h3 className="text-sm font-semibold">Extension Status</h3>
-        <div className="flex items-center justify-between py-2">
-          <div className="space-y-0.5 flex-1">
-            <div className="flex items-center gap-2">
-              {settings.isPaused ? (
-                <Pause className="h-4 w-4 text-orange-500" />
-              ) : (
-                <Play className="h-4 w-4 text-green-500" />
-              )}
-              <label className="text-sm font-medium">
+        <h3 className="text-xs font-medium text-stone-500 dark:text-zinc-500 uppercase tracking-wider">
+          Status
+        </h3>
+        <div className="flex items-center justify-between p-4 bg-stone-100 dark:bg-zinc-800/50 rounded-lg border border-stone-200 dark:border-zinc-700">
+          <div className="flex items-center gap-3">
+            {settings.isPaused ? (
+              <Pause className="w-5 h-5 text-stone-400 dark:text-zinc-500" />
+            ) : (
+              <Play className="w-5 h-5 text-teal-600 dark:text-teal-500" />
+            )}
+            <div>
+              <div className="text-sm font-medium text-stone-700 dark:text-zinc-200">
                 {settings.isPaused ? "Paused" : "Active"}
-              </label>
+              </div>
+              <div className="text-xs text-stone-500 dark:text-zinc-500">
+                {settings.isPaused
+                  ? "Using default Chrome behavior"
+                  : "Organizing downloads by rules"}
+              </div>
             </div>
-            <p className="text-xs text-muted-foreground">
-              {settings.isPaused
-                ? "Downloads use default Chrome behavior"
-                : "Downloads are organized by rules"}
-            </p>
           </div>
           <Switch
             checked={!settings.isPaused}
             onCheckedChange={(checked) => handleTogglePause(!checked)}
+            className="data-[state=checked]:bg-teal-600"
           />
         </div>
       </div>
 
-      {/* Theme Section */}
+      {/* Appearance Section */}
       <div className="space-y-4">
-        <h3 className="text-sm font-semibold">Appearance</h3>
+        <h3 className="text-xs font-medium text-stone-500 dark:text-zinc-500 uppercase tracking-wider">
+          Appearance
+        </h3>
         <div className="space-y-2">
-          <label className="text-sm font-medium">Theme</label>
-          <p className="text-xs text-muted-foreground">
-            Choose how Zen Downloads looks on your device
-          </p>
-          <div className="flex gap-2 pt-2">
+          <label className="text-sm text-stone-700 dark:text-zinc-300">
+            Theme
+          </label>
+          <div className="flex gap-2">
             <Button
               variant={theme === "light" ? "default" : "outline"}
               size="sm"
-              className="flex-1"
+              className={`flex-1 ${
+                theme === "light"
+                  ? "bg-teal-600 hover:bg-teal-500 text-white"
+                  : "bg-transparent border-stone-300 dark:border-zinc-700 text-stone-600 dark:text-zinc-400 hover:bg-stone-100 dark:hover:bg-zinc-800 hover:text-stone-800 dark:hover:text-zinc-200"
+              }`}
               onClick={() => handleThemeChange("light")}
             >
               <Sun className="h-4 w-4 mr-2" />
@@ -120,7 +127,11 @@ export const SettingsCard = () => {
             <Button
               variant={theme === "dark" ? "default" : "outline"}
               size="sm"
-              className="flex-1"
+              className={`flex-1 ${
+                theme === "dark"
+                  ? "bg-teal-600 hover:bg-teal-500 text-white"
+                  : "bg-transparent border-stone-300 dark:border-zinc-700 text-stone-600 dark:text-zinc-400 hover:bg-stone-100 dark:hover:bg-zinc-800 hover:text-stone-800 dark:hover:text-zinc-200"
+              }`}
               onClick={() => handleThemeChange("dark")}
             >
               <Moon className="h-4 w-4 mr-2" />
@@ -129,7 +140,11 @@ export const SettingsCard = () => {
             <Button
               variant={theme === "system" ? "default" : "outline"}
               size="sm"
-              className="flex-1"
+              className={`flex-1 ${
+                theme === "system"
+                  ? "bg-teal-600 hover:bg-teal-500 text-white"
+                  : "bg-transparent border-stone-300 dark:border-zinc-700 text-stone-600 dark:text-zinc-400 hover:bg-stone-100 dark:hover:bg-zinc-800 hover:text-stone-800 dark:hover:text-zinc-200"
+              }`}
               onClick={() => handleThemeChange("system")}
             >
               <Monitor className="h-4 w-4 mr-2" />
@@ -141,29 +156,42 @@ export const SettingsCard = () => {
 
       {/* Downloads Section */}
       <div className="space-y-4">
-        <h3 className="text-sm font-semibold">Downloads</h3>
+        <h3 className="text-xs font-medium text-stone-500 dark:text-zinc-500 uppercase tracking-wider">
+          Downloads
+        </h3>
         <div className="space-y-2">
-          <label htmlFor="conflict-action" className="text-sm font-medium">
+          <label className="text-sm text-stone-700 dark:text-zinc-300">
             Default Conflict Action
           </label>
-          <p className="text-xs text-muted-foreground">
-            What to do when a file with the same name already exists
+          <p className="text-xs text-stone-500 dark:text-zinc-500">
+            What to do when a file already exists
           </p>
           <Select
             value={settings.defaultConflictAction}
             onValueChange={handleConflictActionChange}
           >
-            <SelectTrigger id="conflict-action" className="w-full">
-              <SelectValue placeholder="Select action" />
+            <SelectTrigger className="bg-white dark:bg-zinc-950 border-stone-300 dark:border-zinc-700 text-stone-700 dark:text-zinc-200 focus:ring-1 focus:ring-teal-500 focus:border-teal-500">
+              <SelectValue />
             </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="uniquify">
-                Uniquify - Add (1), (2)... to filename
+            <SelectContent className="bg-white dark:bg-zinc-900 border-stone-200 dark:border-zinc-700">
+              <SelectItem
+                value="uniquify"
+                className="text-stone-700 dark:text-zinc-200 focus:bg-stone-100 dark:focus:bg-zinc-800"
+              >
+                Uniquify - Add (1), (2)...
               </SelectItem>
-              <SelectItem value="overwrite">
-                Overwrite - Replace existing file
+              <SelectItem
+                value="overwrite"
+                className="text-stone-700 dark:text-zinc-200 focus:bg-stone-100 dark:focus:bg-zinc-800"
+              >
+                Overwrite - Replace existing
               </SelectItem>
-              <SelectItem value="prompt">Prompt - Ask me what to do</SelectItem>
+              <SelectItem
+                value="prompt"
+                className="text-stone-700 dark:text-zinc-200 focus:bg-stone-100 dark:focus:bg-zinc-800"
+              >
+                Prompt - Ask each time
+              </SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -171,19 +199,22 @@ export const SettingsCard = () => {
 
       {/* Notifications Section */}
       <div className="space-y-4">
-        <h3 className="text-sm font-semibold">Notifications</h3>
-        <div className="flex items-center justify-between py-2">
-          <div className="space-y-0.5 flex-1">
-            <label className="text-sm font-medium">
-              Show Toast Notifications
-            </label>
-            <p className="text-xs text-muted-foreground">
-              Display a notification on the page when a download is organized
-            </p>
+        <h3 className="text-xs font-medium text-stone-500 dark:text-zinc-500 uppercase tracking-wider">
+          Notifications
+        </h3>
+        <div className="flex items-center justify-between p-4 bg-stone-100 dark:bg-zinc-800/50 rounded-lg border border-stone-200 dark:border-zinc-700">
+          <div>
+            <div className="text-sm font-medium text-stone-700 dark:text-zinc-200">
+              Toast Notifications
+            </div>
+            <div className="text-xs text-stone-500 dark:text-zinc-500">
+              Show notifications when files are organized
+            </div>
           </div>
           <Switch
             checked={settings.showToastNotifications}
             onCheckedChange={handleToggleToast}
+            className="data-[state=checked]:bg-teal-600"
           />
         </div>
       </div>
