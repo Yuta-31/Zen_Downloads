@@ -79,6 +79,7 @@
 [@radix-ui/react-slot@1.2.3](https://github.com/radix-ui/primitives) - MIT
 [@radix-ui/react-slot@1.2.4](https://github.com/radix-ui/primitives) - MIT
 [@radix-ui/react-switch@1.2.6](https://github.com/radix-ui/primitives) - MIT
+[@radix-ui/react-tooltip@1.2.8](https://github.com/radix-ui/primitives) - MIT
 [@radix-ui/react-use-callback-ref@1.1.1](https://github.com/radix-ui/primitives) - MIT
 [@radix-ui/react-use-controllable-state@1.2.2](https://github.com/radix-ui/primitives) - MIT
 [@radix-ui/react-use-effect-event@0.0.2](https://github.com/radix-ui/primitives) - MIT
@@ -485,5 +486,5 @@
 [xmlchars@2.2.0](https://github.com/lddubeau/xmlchars) - MIT
 [yallist@3.1.1](https://github.com/isaacs/yallist) - ISC
 [yocto-queue@0.1.0](https://github.com/sindresorhus/yocto-queue) - MIT
-[zen-downloads@1.2.0](undefined) - UNLICENSED
+[zen-downloads@1.3.0](undefined) - UNLICENSED
 [zod@4.3.5](https://github.com/colinhacks/zod) - MIT
