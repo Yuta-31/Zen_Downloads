@@ -11,15 +11,31 @@ interface Manifest {
   [key: string]: unknown;
 }
 
+interface PackageJson {
+  version: string;
+  [key: string]: unknown;
+}
+
 async function packageExtension(): Promise<void> {
   const rootDir = path.resolve(__dirname, "..");
   const manifestPath = path.join(rootDir, "public", "manifest.json");
+  const packageJsonPath = path.join(rootDir, "package.json");
   const distDir = path.join(rootDir, "dist");
   const appPackagesDir = path.join(rootDir, "appPackages");
 
-  // read manifest.json to get version
+  // Read package.json to get the source of truth for version
+  const packageJson: PackageJson = JSON.parse(
+    fs.readFileSync(packageJsonPath, "utf-8"),
+  );
+  const version = packageJson.version;
+
+  // Sync version to manifest.json
   const manifest: Manifest = JSON.parse(fs.readFileSync(manifestPath, "utf-8"));
-  const version = manifest.version;
+  if (manifest.version !== version) {
+    manifest.version = version;
+    fs.writeFileSync(manifestPath, JSON.stringify(manifest, null, 2) + "\n");
+    console.log(`✓ Synced manifest.json version to ${version}`);
+  }
 
   // If appPackages directory doesn't exist, create it
   if (!fs.existsSync(appPackagesDir)) {

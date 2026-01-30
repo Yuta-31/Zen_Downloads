@@ -3,58 +3,13 @@ import { ChevronDown, ChevronUp, Sparkles, Tag } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { generateFilename, type FileMetadata } from "@/lib/smartRename";
+import { SMART_RENAME_VARIABLES } from "@/lib/constants/tokens";
 
 interface SmartRenameEditorProps {
   value: string;
   onChange: (value: string) => void;
   domain?: string;
 }
-
-// Variable categories for the cheat sheet
-const variableCategories = [
-  {
-    title: "Date & Time",
-    variables: [
-      { token: "{year}", desc: "4-digit year (e.g., 2026)", example: "2026" },
-      { token: "{month}", desc: "2-digit month (e.g., 01)", example: "01" },
-      { token: "{day}", desc: "2-digit day (e.g., 30)", example: "30" },
-      { token: "{hour}", desc: "2-digit hour (e.g., 14)", example: "14" },
-      { token: "{minute}", desc: "2-digit minute (e.g., 35)", example: "35" },
-      { token: "{second}", desc: "2-digit second (e.g., 22)", example: "22" },
-    ],
-  },
-  {
-    title: "File Info",
-    variables: [
-      {
-        token: "{original_name}",
-        desc: "Full filename with extension",
-        example: "report.pdf",
-      },
-      {
-        token: "{basename}",
-        desc: "Filename without extension",
-        example: "report",
-      },
-      { token: "{ext}", desc: "File extension (lowercase)", example: "pdf" },
-    ],
-  },
-  {
-    title: "Source Info",
-    variables: [
-      {
-        token: "{domain}",
-        desc: "Full domain name",
-        example: "files.example.com",
-      },
-      {
-        token: "{hostname}",
-        desc: "Top-level domain",
-        example: "example.com",
-      },
-    ],
-  },
-];
 
 const SmartRenameEditor = ({
   value,
@@ -157,7 +112,7 @@ const SmartRenameEditor = ({
             <p className="text-xs text-stone-500 dark:text-stone-400">
               Click a variable to insert it into the pattern.
             </p>
-            {variableCategories.map((category) => (
+            {SMART_RENAME_VARIABLES.map((category) => (
               <div key={category.title} className="space-y-2">
                 <div className="text-[11px] font-semibold text-stone-500 dark:text-stone-400 uppercase tracking-wide">
                   {category.title}
