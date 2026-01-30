@@ -5,8 +5,12 @@ import {
   isInDomain,
   buildCtx,
   matchAll,
+  matchUnifiedCondition,
+  matchAllUnifiedConditions,
+  matchRule,
   type EvalCtx,
 } from "@/lib/rules/engine";
+import type { UnifiedCondition, Rule } from "@/schemas/rules";
 
 // ---- globToRegExp ----------------------------------------------------------
 
@@ -193,5 +197,427 @@ describe("matchAll", () => {
     ];
 
     expect(matchAll(conditionsFixed as any, ctxWithUrlKey)).toBe(true);
+  });
+});
+
+// ---- matchUnifiedCondition -------------------------------------------------
+
+describe("matchUnifiedCondition", () => {
+  const baseCtx: EvalCtx = buildCtx(
+    "https://sub.example.com/downloads/report.pdf?page=1",
+    "report.pdf",
+    "https://docs.example.com/viewer?id=123"
+  );
+
+  describe("conditionType: domain", () => {
+    it("matches domain with contains", () => {
+      const condition: UnifiedCondition = {
+        conditionType: "domain",
+        matchType: "contains",
+        value: "example.com",
+        caseSensitive: false,
+      };
+      expect(matchUnifiedCondition(condition, baseCtx)).toBe(true);
+    });
+
+    it("matches domain with exact", () => {
+      const condition: UnifiedCondition = {
+        conditionType: "domain",
+        matchType: "exact",
+        value: "sub.example.com",
+        caseSensitive: false,
+      };
+      expect(matchUnifiedCondition(condition, baseCtx)).toBe(true);
+
+      const noMatch: UnifiedCondition = {
+        conditionType: "domain",
+        matchType: "exact",
+        value: "example.com",
+        caseSensitive: false,
+      };
+      expect(matchUnifiedCondition(noMatch, baseCtx)).toBe(false);
+    });
+
+    it("matches domain with glob pattern", () => {
+      const condition: UnifiedCondition = {
+        conditionType: "domain",
+        matchType: "glob",
+        value: "*.example.com",
+        caseSensitive: false,
+      };
+      expect(matchUnifiedCondition(condition, baseCtx)).toBe(true);
+    });
+
+    it("also checks referrer host for domain matching", () => {
+      const condition: UnifiedCondition = {
+        conditionType: "domain",
+        matchType: "contains",
+        value: "docs.example.com",
+        caseSensitive: false,
+      };
+      // Should match referrer host
+      expect(matchUnifiedCondition(condition, baseCtx)).toBe(true);
+    });
+  });
+
+  describe("conditionType: extension", () => {
+    it("matches extension with exact", () => {
+      const condition: UnifiedCondition = {
+        conditionType: "extension",
+        matchType: "exact",
+        value: "pdf",
+        caseSensitive: false,
+      };
+      expect(matchUnifiedCondition(condition, baseCtx)).toBe(true);
+    });
+
+    it("matches extension with in (array)", () => {
+      const condition: UnifiedCondition = {
+        conditionType: "extension",
+        matchType: "in",
+        value: ["pdf", "doc", "docx"],
+        caseSensitive: false,
+      };
+      expect(matchUnifiedCondition(condition, baseCtx)).toBe(true);
+    });
+
+    it("does not match extension with not_in (array)", () => {
+      const condition: UnifiedCondition = {
+        conditionType: "extension",
+        matchType: "not_in",
+        value: ["pdf", "doc"],
+        caseSensitive: false,
+      };
+      expect(matchUnifiedCondition(condition, baseCtx)).toBe(false);
+    });
+
+    it("matches extension with regex", () => {
+      const condition: UnifiedCondition = {
+        conditionType: "extension",
+        matchType: "regex",
+        value: "^(pdf|docx?)$",
+        caseSensitive: false,
+      };
+      expect(matchUnifiedCondition(condition, baseCtx)).toBe(true);
+    });
+  });
+
+  describe("conditionType: filename", () => {
+    it("matches filename with contains", () => {
+      const condition: UnifiedCondition = {
+        conditionType: "filename",
+        matchType: "contains",
+        value: "report",
+        caseSensitive: false,
+      };
+      expect(matchUnifiedCondition(condition, baseCtx)).toBe(true);
+    });
+
+    it("matches filename with starts_with", () => {
+      const condition: UnifiedCondition = {
+        conditionType: "filename",
+        matchType: "starts_with",
+        value: "rep",
+        caseSensitive: false,
+      };
+      expect(matchUnifiedCondition(condition, baseCtx)).toBe(true);
+    });
+
+    it("matches filename with ends_with", () => {
+      const condition: UnifiedCondition = {
+        conditionType: "filename",
+        matchType: "ends_with",
+        value: ".pdf",
+        caseSensitive: false,
+      };
+      expect(matchUnifiedCondition(condition, baseCtx)).toBe(true);
+    });
+
+    it("matches filename with glob", () => {
+      const condition: UnifiedCondition = {
+        conditionType: "filename",
+        matchType: "glob",
+        value: "*.pdf",
+        caseSensitive: false,
+      };
+      expect(matchUnifiedCondition(condition, baseCtx)).toBe(true);
+    });
+  });
+
+  describe("conditionType: path", () => {
+    it("matches path with contains", () => {
+      const condition: UnifiedCondition = {
+        conditionType: "path",
+        matchType: "contains",
+        value: "/downloads/",
+        caseSensitive: false,
+      };
+      expect(matchUnifiedCondition(condition, baseCtx)).toBe(true);
+    });
+
+    it("matches path with starts_with", () => {
+      const condition: UnifiedCondition = {
+        conditionType: "path",
+        matchType: "starts_with",
+        value: "/downloads",
+        caseSensitive: false,
+      };
+      expect(matchUnifiedCondition(condition, baseCtx)).toBe(true);
+    });
+
+    it("matches path with regex", () => {
+      const condition: UnifiedCondition = {
+        conditionType: "path",
+        matchType: "regex",
+        value: "^/downloads/.*\\.pdf$",
+        caseSensitive: false,
+      };
+      expect(matchUnifiedCondition(condition, baseCtx)).toBe(true);
+    });
+  });
+
+  describe("conditionType: mime", () => {
+    it("matches mime type when available", () => {
+      const ctxWithMime: EvalCtx = {
+        ...baseCtx,
+        mime: "application/pdf",
+      };
+      const condition: UnifiedCondition = {
+        conditionType: "mime",
+        matchType: "exact",
+        value: "application/pdf",
+        caseSensitive: false,
+      };
+      expect(matchUnifiedCondition(condition, ctxWithMime)).toBe(true);
+    });
+
+    it("matches mime with contains", () => {
+      const ctxWithMime: EvalCtx = {
+        ...baseCtx,
+        mime: "application/pdf",
+      };
+      const condition: UnifiedCondition = {
+        conditionType: "mime",
+        matchType: "contains",
+        value: "pdf",
+        caseSensitive: false,
+      };
+      expect(matchUnifiedCondition(condition, ctxWithMime)).toBe(true);
+    });
+  });
+
+  describe("case sensitivity", () => {
+    it("case insensitive matching by default", () => {
+      const condition: UnifiedCondition = {
+        conditionType: "filename",
+        matchType: "contains",
+        value: "REPORT",
+        caseSensitive: false,
+      };
+      expect(matchUnifiedCondition(condition, baseCtx)).toBe(true);
+    });
+
+    it("case sensitive matching when enabled", () => {
+      const condition: UnifiedCondition = {
+        conditionType: "filename",
+        matchType: "contains",
+        value: "REPORT",
+        caseSensitive: true,
+      };
+      expect(matchUnifiedCondition(condition, baseCtx)).toBe(false);
+    });
+  });
+
+  describe("invalid regex handling", () => {
+    it("returns false for invalid regex pattern", () => {
+      const condition: UnifiedCondition = {
+        conditionType: "filename",
+        matchType: "regex",
+        value: "[invalid(regex",
+        caseSensitive: false,
+      };
+      expect(matchUnifiedCondition(condition, baseCtx)).toBe(false);
+    });
+  });
+});
+
+// ---- matchAllUnifiedConditions ---------------------------------------------
+
+describe("matchAllUnifiedConditions", () => {
+  const baseCtx: EvalCtx = buildCtx(
+    "https://docs.example.com/reports/2025/annual-report.pdf"
+  );
+
+  it("returns true when all conditions match (AND logic)", () => {
+    const conditions: UnifiedCondition[] = [
+      {
+        conditionType: "domain",
+        matchType: "contains",
+        value: "example.com",
+        caseSensitive: false,
+      },
+      {
+        conditionType: "extension",
+        matchType: "exact",
+        value: "pdf",
+        caseSensitive: false,
+      },
+      {
+        conditionType: "path",
+        matchType: "contains",
+        value: "/reports/",
+        caseSensitive: false,
+      },
+    ];
+    expect(matchAllUnifiedConditions(conditions, baseCtx)).toBe(true);
+  });
+
+  it("returns false if any condition fails", () => {
+    const conditions: UnifiedCondition[] = [
+      {
+        conditionType: "domain",
+        matchType: "contains",
+        value: "example.com",
+        caseSensitive: false,
+      },
+      {
+        conditionType: "extension",
+        matchType: "exact",
+        value: "docx", // Will fail - file is .pdf
+        caseSensitive: false,
+      },
+    ];
+    expect(matchAllUnifiedConditions(conditions, baseCtx)).toBe(false);
+  });
+
+  it("returns true for empty conditions array", () => {
+    expect(matchAllUnifiedConditions([], baseCtx)).toBe(true);
+  });
+});
+
+// ---- matchRule -------------------------------------------------------------
+
+describe("matchRule", () => {
+  const baseCtx: EvalCtx = buildCtx(
+    "https://docs.example.com/reports/2025/annual-report.pdf"
+  );
+
+  it("matches rule with unified conditions", () => {
+    const rule: Rule = {
+      id: "test-1",
+      name: "Test Rule",
+      enabled: true,
+      domains: ["*"],
+      conditions: [],
+      unifiedConditions: [
+        {
+          conditionType: "extension",
+          matchType: "in",
+          value: ["pdf", "doc", "docx"],
+          caseSensitive: false,
+        },
+      ],
+      actions: { pathTemplate: "{host}/{file}" },
+    };
+    expect(matchRule(rule, baseCtx)).toBe(true);
+  });
+
+  it("falls back to legacy domains when no unified conditions", () => {
+    const rule: Rule = {
+      id: "test-2",
+      name: "Legacy Domain Rule",
+      enabled: true,
+      domains: ["*.example.com"],
+      conditions: [],
+      unifiedConditions: [],
+      actions: { pathTemplate: "{host}/{file}" },
+    };
+    expect(matchRule(rule, baseCtx)).toBe(true);
+  });
+
+  it("falls back to legacy conditions when no unified conditions", () => {
+    const rule: Rule = {
+      id: "test-3",
+      name: "Legacy Conditions Rule",
+      enabled: true,
+      domains: ["*"],
+      conditions: [{ key: "ext", op: "in", value: ["pdf", "docx"] }],
+      unifiedConditions: [],
+      actions: { pathTemplate: "{host}/{file}" },
+    };
+    expect(matchRule(rule, baseCtx)).toBe(true);
+  });
+
+  it("unified conditions take precedence over legacy", () => {
+    const rule: Rule = {
+      id: "test-4",
+      name: "Mixed Rule",
+      enabled: true,
+      domains: ["other.com"], // Would not match
+      conditions: [{ key: "ext", op: "equals", value: "zip" }], // Would not match
+      unifiedConditions: [
+        {
+          conditionType: "domain",
+          matchType: "contains",
+          value: "example.com",
+          caseSensitive: false,
+        },
+      ],
+      actions: { pathTemplate: "{host}/{file}" },
+    };
+    // Should match because unified conditions take precedence
+    expect(matchRule(rule, baseCtx)).toBe(true);
+  });
+
+  it("does not match when unified conditions fail", () => {
+    const rule: Rule = {
+      id: "test-5",
+      name: "No Match Rule",
+      enabled: true,
+      domains: ["*"],
+      conditions: [],
+      unifiedConditions: [
+        {
+          conditionType: "extension",
+          matchType: "exact",
+          value: "zip",
+          caseSensitive: false,
+        },
+      ],
+      actions: { pathTemplate: "{host}/{file}" },
+    };
+    expect(matchRule(rule, baseCtx)).toBe(false);
+  });
+
+  it("matches complex multi-condition rule", () => {
+    const rule: Rule = {
+      id: "test-6",
+      name: "Complex Rule",
+      enabled: true,
+      domains: ["*"],
+      conditions: [],
+      unifiedConditions: [
+        {
+          conditionType: "domain",
+          matchType: "glob",
+          value: "*.example.com",
+          caseSensitive: false,
+        },
+        {
+          conditionType: "extension",
+          matchType: "in",
+          value: ["pdf", "doc", "docx"],
+          caseSensitive: false,
+        },
+        {
+          conditionType: "filename",
+          matchType: "contains",
+          value: "report",
+          caseSensitive: false,
+        },
+      ],
+      actions: { pathTemplate: "{host}/reports/{file}" },
+    };
+    expect(matchRule(rule, baseCtx)).toBe(true);
   });
 });
