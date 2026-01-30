@@ -25,6 +25,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { useRulesDispatch } from "@/options/hooks/useRules";
+import SmartRenameEditor from "./SmartRenameEditor";
 import type { Rule } from "@/schemas/rules";
 import type { ConflictAction } from "@/schemas/rules";
 
@@ -173,6 +174,11 @@ const RuleHeader = ({
               <span className="font-medium">
                 {rule.domains.join(", ")} {">"} {rule.actions.pathTemplate}
               </span>
+              {rule.actions.renamePattern && (
+                <span className="block text-amber-600 dark:text-amber-400">
+                  📝 Rename: {rule.actions.renamePattern}
+                </span>
+              )}
             </div>
           )}
         </div>
@@ -342,6 +348,15 @@ const RuleDetails = ({ rule }: RuleDetailsProps) => {
     });
   };
 
+  const handleUpdateRenamePattern = (renamePattern: string) => {
+    updateRule(rule.id, {
+      actions: {
+        ...rule.actions,
+        renamePattern: renamePattern || undefined,
+      },
+    });
+  };
+
   return (
     <div className="p-6 space-y-4">
       <div className="flex-1">
@@ -419,6 +434,18 @@ const RuleDetails = ({ rule }: RuleDetailsProps) => {
               </Select>
             </div>
           </div>
+
+          {/* Smart Rename Editor Section */}
+          <div className="pt-4 border-t border-stone-200 dark:border-slate-600 mt-4">
+            <div onClick={(e) => e.stopPropagation()}>
+              <SmartRenameEditor
+                value={rule.actions.renamePattern || ""}
+                onChange={handleUpdateRenamePattern}
+                domain={rule.domains[0] || "example.com"}
+              />
+            </div>
+          </div>
+
           {rule.conditions && rule.conditions.length > 0 && (
             <div className="flex items-center gap-2">
               <span className="font-semibold whitespace-nowrap w-20">
