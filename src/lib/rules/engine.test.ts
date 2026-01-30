@@ -59,7 +59,7 @@ describe("isInDomain", () => {
 
   it("Returns true if any of multiple patterns match", () => {
     expect(isInDomain(["a.com", "*.example.com"], "sub.example.com")).toBe(
-      true
+      true,
     );
     expect(isInDomain(["a.com", "b.com"], "c.com")).toBe(false);
   });
@@ -70,11 +70,11 @@ describe("isInDomain", () => {
 describe("buildCtx", () => {
   it("Can correctly build EvalCtx from URL", () => {
     const ctx = buildCtx(
-      "https://example.com:8080/foo/bar/file.pdf?foo=bar&baz=1#section"
+      "https://example.com:8080/foo/bar/file.pdf?foo=bar&baz=1#section",
     );
 
     expect(ctx.url).toBe(
-      "https://example.com:8080/foo/bar/file.pdf?foo=bar&baz=1#section"
+      "https://example.com:8080/foo/bar/file.pdf?foo=bar&baz=1#section",
     );
     expect(ctx.protocol).toBe("https");
     expect(ctx.host).toBe("example.com");
@@ -115,7 +115,7 @@ describe("buildCtx", () => {
 
   it("Can handle long file names correctly", () => {
     const ctx = buildCtx(
-      "https://example.com/very/long/path/to/a/very/long/file-example_DOCX_500kB.docx"
+      "https://example.com/very/long/path/to/a/very/long/file-example_DOCX_500kB.docx",
     );
     expect(ctx.file).toBe("file-example_DOCX_500kB.docx");
     expect(ctx.basename).toBe("file-example_DOCX_500kB");
@@ -133,7 +133,7 @@ describe("buildCtx", () => {
 
 describe("matchAll", () => {
   const baseCtx: EvalCtx = buildCtx(
-    "https://sub.example.com:443/reports/2025/file.pdf?foo=bar&mode=download#top"
+    "https://sub.example.com:443/reports/2025/file.pdf?foo=bar&mode=download#top",
   );
 
   it("Returns true when all conditions are met", () => {
@@ -206,7 +206,7 @@ describe("matchUnifiedCondition", () => {
   const baseCtx: EvalCtx = buildCtx(
     "https://sub.example.com/downloads/report.pdf?page=1",
     "report.pdf",
-    "https://docs.example.com/viewer?id=123"
+    "https://docs.example.com/viewer?id=123",
   );
 
   describe("conditionType: domain", () => {
@@ -445,7 +445,7 @@ describe("matchUnifiedCondition", () => {
 
 describe("matchAllUnifiedConditions", () => {
   const baseCtx: EvalCtx = buildCtx(
-    "https://docs.example.com/reports/2025/annual-report.pdf"
+    "https://docs.example.com/reports/2025/annual-report.pdf",
   );
 
   it("returns true when all conditions match (AND logic)", () => {
@@ -499,7 +499,7 @@ describe("matchAllUnifiedConditions", () => {
 
 describe("matchRule", () => {
   const baseCtx: EvalCtx = buildCtx(
-    "https://docs.example.com/reports/2025/annual-report.pdf"
+    "https://docs.example.com/reports/2025/annual-report.pdf",
   );
 
   it("matches rule with unified conditions", () => {

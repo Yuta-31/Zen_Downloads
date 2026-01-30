@@ -1,4 +1,10 @@
-import type { Rule, RuleCondition } from "@/schemas/rules";
+import type {
+  Rule,
+  RuleCondition,
+  UnifiedCondition,
+  ConditionType,
+  MatchType,
+} from "@/schemas/rules";
 
 /** Convert glob pattern to regular expression */
 export const globToRegExp = (glob: string): RegExp => {
@@ -12,7 +18,7 @@ export const globToRegExp = (glob: string): RegExp => {
 export const isInDomain = (
   patterns: string[],
   host: string,
-  referrerHost?: string
+  referrerHost?: string,
 ) => {
   // Match if either download URL host or referrer host matches the pattern
   return patterns.some((p) => {
@@ -46,7 +52,7 @@ export type EvalCtx = {
 export const buildCtx = (
   urlStr: string,
   filenameHint?: string,
-  referrer?: string
+  referrer?: string,
 ): EvalCtx => {
   const url = new URL(urlStr);
   const qs = Object.fromEntries(new URLSearchParams(url.search).entries());
@@ -59,7 +65,7 @@ export const buildCtx = (
       const refUrl = new URL(referrer);
       referrerHost = refUrl.hostname;
       referrerQuery = Object.fromEntries(
-        new URLSearchParams(refUrl.search).entries()
+        new URLSearchParams(refUrl.search).entries(),
       );
     } catch {
       // Ignore if referrer is not a valid URL
@@ -95,9 +101,151 @@ export const buildCtx = (
   };
 };
 
+/**
+ * Get the target value for a condition type from the evaluation context
+ */
+const getConditionTargetValue = (
+  conditionType: ConditionType,
+  ctx: EvalCtx,
+): string => {
+  switch (conditionType) {
+    case "domain":
+      return ctx.host;
+    case "extension":
+      return ctx.ext;
+    case "filename":
+      return ctx.file;
+    case "path":
+      return ctx.path;
+    case "mime":
+      return ctx.mime ?? "";
+    default:
+      return "";
+  }
+};
+
+/**
+ * Apply match logic based on match type
+ */
+const applyMatchType = (
+  matchType: MatchType,
+  targetValue: string,
+  conditionValue: string | string[],
+  caseSensitive: boolean = false,
+): boolean => {
+  // Normalize case if case-insensitive
+  const normalizeCase = (s: string) => (caseSensitive ? s : s.toLowerCase());
+  const target = normalizeCase(targetValue);
+
+  switch (matchType) {
+    case "exact": {
+      const value = normalizeCase(conditionValue as string);
+      return target === value;
+    }
+
+    case "contains": {
+      const value = normalizeCase(conditionValue as string);
+      return target.includes(value);
+    }
+
+    case "starts_with": {
+      const value = normalizeCase(conditionValue as string);
+      return target.startsWith(value);
+    }
+
+    case "ends_with": {
+      const value = normalizeCase(conditionValue as string);
+      return target.endsWith(value);
+    }
+
+    case "regex": {
+      try {
+        const flags = caseSensitive ? "" : "i";
+        const regex = new RegExp(conditionValue as string, flags);
+        return regex.test(targetValue);
+      } catch {
+        return false;
+      }
+    }
+
+    case "glob": {
+      const regex = globToRegExp(conditionValue as string);
+      return regex.test(targetValue);
+    }
+
+    case "in": {
+      const values = Array.isArray(conditionValue)
+        ? conditionValue.map(normalizeCase)
+        : [normalizeCase(conditionValue)];
+      return values.includes(target);
+    }
+
+    case "not_in": {
+      const values = Array.isArray(conditionValue)
+        ? conditionValue.map(normalizeCase)
+        : [normalizeCase(conditionValue)];
+      return !values.includes(target);
+    }
+
+    default:
+      return false;
+  }
+};
+
+/**
+ * Match a single unified condition against the evaluation context
+ */
+export const matchUnifiedCondition = (
+  condition: UnifiedCondition,
+  ctx: EvalCtx,
+): boolean => {
+  const targetValue = getConditionTargetValue(condition.conditionType, ctx);
+
+  // Special handling for domain - also check referrer host
+  if (condition.conditionType === "domain" && ctx.referrerHost) {
+    const matchesPrimary = applyMatchType(
+      condition.matchType,
+      targetValue,
+      condition.value,
+      condition.caseSensitive,
+    );
+    if (matchesPrimary) return true;
+
+    // Also check referrer host
+    return applyMatchType(
+      condition.matchType,
+      ctx.referrerHost,
+      condition.value,
+      condition.caseSensitive,
+    );
+  }
+
+  return applyMatchType(
+    condition.matchType,
+    targetValue,
+    condition.value,
+    condition.caseSensitive,
+  );
+};
+
+/**
+ * Match all unified conditions against the evaluation context (AND logic)
+ */
+export const matchAllUnifiedConditions = (
+  conditions: UnifiedCondition[],
+  ctx: EvalCtx,
+): boolean => {
+  if (conditions.length === 0) return true;
+  return conditions.every((condition) => matchUnifiedCondition(condition, ctx));
+};
+
+/**
+ * Legacy: Match all conditions using the old format
+ */
+
 export const matchAll = (
   conditions: Rule["conditions"],
-  ctx: EvalCtx
+  ctx: EvalCtx,
 ): boolean => {
   const getVal = (key: string): string => {
     if (key === "host") return ctx.host;
@@ -152,4 +300,26 @@ export const matchAll = (
       }
     }
   });
+};
+
+/**
+ * Check if a rule matches the given context
+ * Supports both legacy domains/conditions and new unified conditions
+ */
+export const matchRule = (rule: Rule, ctx: EvalCtx): boolean => {
+  // New unified conditions take precedence
+  if (rule.unifiedConditions && rule.unifiedConditions.length > 0) {
+    return matchAllUnifiedConditions(rule.unifiedConditions, ctx);
+  }
+
+  // Fall back to legacy matching
+  const domainMatch = rule.domains
+    ? isInDomain(rule.domains, ctx.host, ctx.referrerHost)
+    : true;
+
+  const conditionsMatch = rule.conditions
+    ? matchAll(rule.conditions, ctx)
+    : true;
+
+  return domainMatch && conditionsMatch;
 };

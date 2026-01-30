@@ -1,7 +1,7 @@
 import { Trash2, Pencil } from "lucide-react";
 import { DragControls, motion } from "framer-motion";
 import { GripVertical } from "lucide-react";
-import { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef, useMemo } from "react";
 import { Switch } from "@/components/ui/switch";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -25,10 +25,35 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { useRulesDispatch } from "@/options/hooks/useRules";
-import type { Rule } from "@/schemas/rules";
-import type { ConflictAction } from "@/schemas/rules";
+import { ConditionEditor } from "./ConditionEditor";
+import type { Rule, UnifiedCondition, ConflictAction } from "@/schemas/rules";
 
 const MotionCard = motion(Card);
+
+// Helper to display conditions in a readable format
+const formatConditionSummary = (rule: Rule): string => {
+  const conditions = rule.unifiedConditions || [];
+
+  // Fallback to legacy domains if no unified conditions
+  if (conditions.length === 0 && rule.domains && rule.domains.length > 0) {
+    return rule.domains.join(", ");
+  }
+
+  if (conditions.length === 0) {
+    return "*";
+  }
+
+  return (
+    conditions
+      .slice(0, 2) // Show max 2 conditions in summary
+      .map((c) => {
+        const value = Array.isArray(c.value) ? c.value.join(", ") : c.value;
+        return `${c.conditionType}: ${value}`;
+      })
+      .join(" & ") +
+    (conditions.length > 2 ? ` +${conditions.length - 2} more` : "")
+  );
+};
 
 interface RuleListRowCardProps {
   rule: Rule;
@@ -171,7 +196,7 @@ const RuleHeader = ({
           {!isOpen && (
             <div className="text-xs text-stone-500 dark:text-stone-400 mt-1 space-y-0.5">
               <span className="font-medium">
-                {rule.domains.join(", ")} {">"} {rule.actions.pathTemplate}
+                {formatConditionSummary(rule)} {"→"} {rule.actions.pathTemplate}
               </span>
             </div>
           )}
@@ -315,18 +340,60 @@ const EditableField = ({
 const RuleDetails = ({ rule }: RuleDetailsProps) => {
   const { updateRule } = useRulesDispatch();
 
+  // Initialize unified conditions from legacy domains if needed
+  const initialConditions = useMemo((): UnifiedCondition[] => {
+    if (rule.unifiedConditions && rule.unifiedConditions.length > 0) {
+      return rule.unifiedConditions;
+    }
+    // Migrate from legacy domains
+    if (rule.domains && rule.domains.length > 0) {
+      return rule.domains.map((domain) => {
+        const matchType = domain.includes("*") ? "glob" : "contains";
+        return {
+          conditionType: "domain" as const,
+          matchType: matchType as "glob" | "contains",
+          value: domain,
+          caseSensitive: false,
+        };
+      });
+    }
+    return [
+      {
+        conditionType: "domain" as const,
+        matchType: "contains" as const,
+        value: "*",
+        caseSensitive: false,
+      },
+    ];
+  }, [rule.unifiedConditions, rule.domains]);
+
+  const [conditions, setConditions] =
+    useState<UnifiedCondition[]>(initialConditions);
+
+  // Sync local state when rule changes
+  useEffect(() => {
+    setConditions(initialConditions);
+  }, [initialConditions]);
+
   const handleUpdateName = (name: string) => {
     updateRule(rule.id, { name });
   };
 
-  const handleUpdateDomains = (domainsStr: string) => {
-    const domains = domainsStr
-      .split(",")
-      .map((d) => d.trim())
-      .filter((d) => d !== "");
-    if (domains.length > 0) {
-      updateRule(rule.id, { domains });
-    }
+  const handleUpdateConditions = (newConditions: UnifiedCondition[]) => {
+    setConditions(newConditions);
+
+    // Also update legacy domains for backward compatibility
+    const domainConditions = newConditions.filter(
+      (c) => c.conditionType === "domain",
+    );
+    const domains = domainConditions.map((c) =>
+      Array.isArray(c.value) ? c.value[0] : c.value,
+    );
+
+    updateRule(rule.id, {
+      unifiedConditions: newConditions,
+      domains: domains.length > 0 ? domains : ["*"],
+    });
   };
 
   const handleUpdatePathTemplate = (pathTemplate: string) => {
@@ -343,91 +410,60 @@ const RuleDetails = ({ rule }: RuleDetailsProps) => {
   };
 
   return (
-    <div className="p-6 space-y-4">
-      <div className="flex-1">
-        <div className="mb-4">
-          <EditableField
-            value={rule.name}
-            onSave={handleUpdateName}
-            label="Rule Name"
-            className="text-lg font-semibold text-stone-800 dark:text-stone-200"
-          />
-        </div>
-        <div className="space-y-3 text-sm text-stone-600 dark:text-stone-300">
-          <div className="flex items-center gap-2">
-            <span className="font-semibold whitespace-nowrap w-20">
-              Domain:
-            </span>
-            <div className="flex-1">
-              <EditableField
-                value={rule.domains.join(", ")}
-                onSave={handleUpdateDomains}
-                label="Domain"
-              />
-            </div>
-          </div>
-          <div className="flex items-center gap-2">
-            <span className="font-semibold whitespace-nowrap w-20">
-              Save to:
-            </span>
-            <div className="flex-1">
-              <EditableField
-                value={rule.actions.pathTemplate}
-                onSave={handleUpdatePathTemplate}
-                label="Path Template"
-              />
-            </div>
-          </div>
-          <div className="flex items-center gap-2">
-            <span className="font-semibold whitespace-nowrap w-20">
-              On Conflict:
-            </span>
-            <div className="flex-1">
-              <Select
-                value={rule.actions.conflict || "global"}
-                onValueChange={handleUpdateConflictAction}
-              >
-                <SelectTrigger className="h-8">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="global">
-                    Use Global Default -{" "}
-                    <span className="text-muted-foreground">
-                      Follows the setting in preferences
-                    </span>
-                  </SelectItem>
-                  <SelectItem value="uniquify">
-                    Uniquify -{" "}
-                    <span className="text-muted-foreground">
-                      Add (1), (2)... to filename
-                    </span>
-                  </SelectItem>
-                  <SelectItem value="overwrite">
-                    Overwrite -{" "}
-                    <span className="text-muted-foreground">
-                      Replace existing file
-                    </span>
-                  </SelectItem>
-                  <SelectItem value="prompt">
-                    Prompt -{" "}
-                    <span className="text-muted-foreground">
-                      Ask me what to do
-                    </span>
-                  </SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-          {rule.conditions && rule.conditions.length > 0 && (
-            <div className="flex items-center gap-2">
-              <span className="font-semibold whitespace-nowrap w-20">
-                Conditions:
-              </span>
-              <span>{rule.conditions.length} rules</span>
-            </div>
-          )}
-        </div>
+    <div className="p-6 space-y-5 border-t border-stone-200 dark:border-slate-600">
+      {/* Rule Name */}
+      <div className="mb-4">
+        <EditableField
+          value={rule.name}
+          onSave={handleUpdateName}
+          label="Rule Name"
+          className="text-lg font-semibold text-stone-800 dark:text-stone-200"
+        />
+      </div>
+
+      {/* Conditions Editor - Replaces Domain input */}
+      <div onClick={(e) => e.stopPropagation()}>
+        <ConditionEditor
+          conditions={conditions}
+          onChange={handleUpdateConditions}
+        />
+      </div>
+
+      {/* Path Template */}
+      <div className="space-y-2" onClick={(e) => e.stopPropagation()}>
+        <label className="text-xs font-medium text-stone-500 dark:text-stone-400 uppercase tracking-wider">
+          Destination Folder
+        </label>
+        <Input
+          value={rule.actions.pathTemplate}
+          onChange={(e) => handleUpdatePathTemplate(e.target.value)}
+          className="bg-white dark:bg-slate-800 border-stone-300 dark:border-slate-600 font-mono text-sm"
+          placeholder="{host}/{ext}/{file}"
+        />
+        <p className="text-[10px] text-stone-500 dark:text-stone-400">
+          Use variables like {"{host}"}, {"{ext}"}, {"{yyyy-mm-dd}"}
+        </p>
+      </div>
+
+      {/* Conflict Action */}
+      <div className="space-y-2" onClick={(e) => e.stopPropagation()}>
+        <label className="text-xs font-medium text-stone-500 dark:text-stone-400 uppercase tracking-wider">
+          On Conflict
+        </label>
+        <Select
+          value={rule.actions.conflict || "global"}
+          onValueChange={handleUpdateConflictAction}
+        >
+          <SelectTrigger className="bg-white dark:bg-slate-800 border-stone-300 dark:border-slate-600">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent className="bg-white dark:bg-slate-800">
+            <SelectItem value="global">Use Global Default</SelectItem>
+            <SelectItem value="uniquify">Uniquify (add numbers)</SelectItem>
+            <SelectItem value="overwrite">Overwrite existing</SelectItem>
+            <SelectItem value="prompt">Ask me each time</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
     </div>
   );
