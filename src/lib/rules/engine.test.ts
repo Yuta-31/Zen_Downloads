@@ -281,6 +281,30 @@ describe("matchUnifiedCondition", () => {
       expect(matchUnifiedCondition(condition, baseCtx)).toBe(true);
     });
 
+    it("matches extension with in (comma-separated string)", () => {
+      const condition: UnifiedCondition = {
+        conditionType: "extension",
+        matchType: "in",
+        value: "pdf, doc, docx",
+        caseSensitive: false,
+      };
+      expect(matchUnifiedCondition(condition, baseCtx)).toBe(true);
+    });
+
+    it("matches doc extension with in (comma-separated string)", () => {
+      const docCtx = buildCtx(
+        "https://example.com/document.doc",
+        "document.doc",
+      );
+      const condition: UnifiedCondition = {
+        conditionType: "extension",
+        matchType: "in",
+        value: "pdf, doc",
+        caseSensitive: false,
+      };
+      expect(matchUnifiedCondition(condition, docCtx)).toBe(true);
+    });
+
     it("does not match extension with not_in (array)", () => {
       const condition: UnifiedCondition = {
         conditionType: "extension",
@@ -370,6 +394,18 @@ describe("matchUnifiedCondition", () => {
         conditionType: "path",
         matchType: "regex",
         value: "^/downloads/.*\\.pdf$",
+        caseSensitive: false,
+      };
+      expect(matchUnifiedCondition(condition, baseCtx)).toBe(true);
+    });
+
+    it("also checks referrer path for path matching", () => {
+      // baseCtx has referrer: https://docs.example.com/viewer?id=123
+      // so referrerPath is /viewer
+      const condition: UnifiedCondition = {
+        conditionType: "path",
+        matchType: "contains",
+        value: "/viewer",
         caseSensitive: false,
       };
       expect(matchUnifiedCondition(condition, baseCtx)).toBe(true);

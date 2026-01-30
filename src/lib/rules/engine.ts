@@ -45,6 +45,7 @@ export type EvalCtx = {
   // Optional fields (can be extended later if needed)
   mime?: string;
   referrerHost?: string;
+  referrerPath?: string; // Path from referrer URL
   referrerQuery?: Record<string, string | undefined>; // Query parameters from referrer
 };
 
@@ -57,13 +58,15 @@ export const buildCtx = (
   const url = new URL(urlStr);
   const qs = Object.fromEntries(new URLSearchParams(url.search).entries());
 
-  // Parse referrer query parameters
+  // Parse referrer URL components
   let referrerQuery: Record<string, string | undefined> | undefined;
   let referrerHost: string | undefined;
+  let referrerPath: string | undefined;
   if (referrer) {
     try {
       const refUrl = new URL(referrer);
       referrerHost = refUrl.hostname;
+      referrerPath = refUrl.pathname;
       referrerQuery = Object.fromEntries(
         new URLSearchParams(refUrl.search).entries(),
       );
@@ -97,6 +100,7 @@ export const buildCtx = (
     ext,
     now: new Date(),
     referrerHost,
+    referrerPath,
     referrerQuery,
   };
 };
@@ -174,16 +178,24 @@ const applyMatchType = (
     }
 
     case "in": {
+      // Handle both array and comma-separated string
       const values = Array.isArray(conditionValue)
         ? conditionValue.map(normalizeCase)
-        : [normalizeCase(conditionValue)];
+        : (conditionValue as string)
+            .split(",")
+            .map((s) => normalizeCase(s.trim()))
+            .filter(Boolean);
       return values.includes(target);
     }
 
     case "not_in": {
+      // Handle both array and comma-separated string
       const values = Array.isArray(conditionValue)
         ? conditionValue.map(normalizeCase)
-        : [normalizeCase(conditionValue)];
+        : (conditionValue as string)
+            .split(",")
+            .map((s) => normalizeCase(s.trim()))
+            .filter(Boolean);
       return !values.includes(target);
     }
 
@@ -215,6 +227,25 @@ export const matchUnifiedCondition = (
     return applyMatchType(
       condition.matchType,
       ctx.referrerHost,
+      condition.value,
+      condition.caseSensitive,
+    );
+  }
+
+  // Special handling for path - also check referrer path
+  if (condition.conditionType === "path" && ctx.referrerPath) {
+    const matchesPrimary = applyMatchType(
+      condition.matchType,
+      targetValue,
+      condition.value,
+      condition.caseSensitive,
+    );
+    if (matchesPrimary) return true;
+
+    // Also check referrer path
+    return applyMatchType(
+      condition.matchType,
+      ctx.referrerPath,
       condition.value,
       condition.caseSensitive,
     );

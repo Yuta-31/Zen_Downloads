@@ -99,22 +99,20 @@ const ConditionRow: React.FC<{
     let newMatchType: MatchType = condition.matchType;
     let newValue = condition.value;
 
-    // If switching to extension, default to "in" with array
+    // If switching to extension, default to "in" match type
+    // Keep value as string - engine handles both string and array
     if (
       value === "extension" &&
       !["in", "not_in"].includes(condition.matchType)
     ) {
       newMatchType = "in";
-      newValue =
-        typeof condition.value === "string"
-          ? condition.value
-              .split(",")
-              .map((s) => s.trim())
-              .filter(Boolean)
-          : condition.value;
+      // Convert array to comma-separated string if needed
+      if (Array.isArray(condition.value)) {
+        newValue = condition.value.join(", ");
+      }
     }
 
-    // If switching from extension to something else, convert array to string
+    // If switching from extension to something else, ensure value is string
     if (value !== "extension" && Array.isArray(condition.value)) {
       newValue = condition.value.join(", ");
       if (["in", "not_in"].includes(condition.matchType)) {
@@ -133,19 +131,9 @@ const ConditionRow: React.FC<{
   const handleMatchTypeChange = (value: MatchType) => {
     let newValue = condition.value;
 
-    // Convert between array and string formats
-    if (
-      ["in", "not_in"].includes(value) &&
-      typeof condition.value === "string"
-    ) {
-      newValue = condition.value
-        .split(",")
-        .map((s) => s.trim())
-        .filter(Boolean);
-    } else if (
-      !["in", "not_in"].includes(value) &&
-      Array.isArray(condition.value)
-    ) {
+    // Always keep value as string - engine handles comma-separated strings
+    // Only convert array to string if we have an array
+    if (Array.isArray(condition.value)) {
       newValue = condition.value.join(", ");
     }
 
@@ -157,19 +145,12 @@ const ConditionRow: React.FC<{
   };
 
   const handleValueChange = (inputValue: string) => {
-    let newValue: string | string[] = inputValue;
-
-    // For array match types, split by comma
-    if (["in", "not_in"].includes(condition.matchType)) {
-      newValue = inputValue
-        .split(",")
-        .map((s) => s.trim())
-        .filter(Boolean);
-    }
-
+    // For array match types, keep as string during editing to allow comma/space input
+    // The conversion to array happens when displaying or saving
+    // For non-array types, just use the string directly
     onUpdate(index, {
       ...condition,
-      value: newValue,
+      value: inputValue,
     });
   };
 
