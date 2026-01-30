@@ -66,6 +66,7 @@ export const RuleConditionSchema = z.union([
 export const RuleActionSchema = z.object({
   pathTemplate: z.string().min(1),
   conflict: ConflictActionSchema.optional(),
+  renamePattern: z.string().optional(),
   transforms: z
     .array(z.enum(["lower-ext", "upper-ext", "sanitize-file", "normalize-nfc"]))
     .optional(),

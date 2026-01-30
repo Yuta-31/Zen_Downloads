@@ -25,6 +25,8 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { useRulesDispatch } from "@/options/hooks/useRules";
+import SmartRenameEditor from "./SmartRenameEditor";
+import type { ConflictAction } from "@/schemas/rules";
 import { ConditionEditor } from "./ConditionEditor";
 import type { Rule, UnifiedCondition, ConflictAction } from "@/schemas/rules";
 
@@ -198,6 +200,11 @@ const RuleHeader = ({
               <span className="font-medium">
                 {formatConditionSummary(rule)} {"→"} {rule.actions.pathTemplate}
               </span>
+              {rule.actions.renamePattern && (
+                <span className="block text-amber-600 dark:text-amber-400">
+                  📝 Rename: {rule.actions.renamePattern}
+                </span>
+              )}
             </div>
           )}
         </div>
@@ -409,7 +416,113 @@ const RuleDetails = ({ rule }: RuleDetailsProps) => {
     });
   };
 
+  const handleUpdateRenamePattern = (renamePattern: string) => {
+    updateRule(rule.id, {
+      actions: {
+        ...rule.actions,
+        renamePattern: renamePattern || undefined,
+      },
+    });
+  };
+
   return (
+    <div className="p-6 space-y-4">
+      <div className="flex-1">
+        <div className="mb-4">
+          <EditableField
+            value={rule.name}
+            onSave={handleUpdateName}
+            label="Rule Name"
+            className="text-lg font-semibold text-stone-800 dark:text-stone-200"
+          />
+        </div>
+        <div className="space-y-3 text-sm text-stone-600 dark:text-stone-300">
+          <div className="flex items-center gap-2">
+            <span className="font-semibold whitespace-nowrap w-20">
+              Domain:
+            </span>
+            <div className="flex-1">
+              <EditableField
+                value={rule.domains.join(", ")}
+                onSave={handleUpdateDomains}
+                label="Domain"
+              />
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="font-semibold whitespace-nowrap w-20">
+              Save to:
+            </span>
+            <div className="flex-1">
+              <EditableField
+                value={rule.actions.pathTemplate}
+                onSave={handleUpdatePathTemplate}
+                label="Path Template"
+              />
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="font-semibold whitespace-nowrap w-20">
+              On Conflict:
+            </span>
+            <div className="flex-1">
+              <Select
+                value={rule.actions.conflict || "global"}
+                onValueChange={handleUpdateConflictAction}
+              >
+                <SelectTrigger className="h-8">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="global">
+                    Use Global Default -{" "}
+                    <span className="text-muted-foreground">
+                      Follows the setting in preferences
+                    </span>
+                  </SelectItem>
+                  <SelectItem value="uniquify">
+                    Uniquify -{" "}
+                    <span className="text-muted-foreground">
+                      Add (1), (2)... to filename
+                    </span>
+                  </SelectItem>
+                  <SelectItem value="overwrite">
+                    Overwrite -{" "}
+                    <span className="text-muted-foreground">
+                      Replace existing file
+                    </span>
+                  </SelectItem>
+                  <SelectItem value="prompt">
+                    Prompt -{" "}
+                    <span className="text-muted-foreground">
+                      Ask me what to do
+                    </span>
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          {/* Smart Rename Editor Section */}
+          <div className="pt-4 border-t border-stone-200 dark:border-slate-600 mt-4">
+            <div onClick={(e) => e.stopPropagation()}>
+              <SmartRenameEditor
+                value={rule.actions.renamePattern || ""}
+                onChange={handleUpdateRenamePattern}
+                domain={rule.domains[0] || "example.com"}
+              />
+            </div>
+          </div>
+
+          {rule.conditions && rule.conditions.length > 0 && (
+            <div className="flex items-center gap-2">
+              <span className="font-semibold whitespace-nowrap w-20">
+                Conditions:
+              </span>
+              <span>{rule.conditions.length} rules</span>
+            </div>
+          )}
+        </div>
     <div className="p-6 space-y-5 border-t border-stone-200 dark:border-slate-600">
       {/* Rule Name */}
       <div className="mb-4">
