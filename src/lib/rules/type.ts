@@ -9,6 +9,14 @@ const DEFAULT_RULES: RulesConfig = {
       enabled: true,
       domains: ["*"],
       conditions: [{ key: "ext", op: "in", value: ["doc", "docx"] }],
+      unifiedConditions: [
+        {
+          conditionType: "extension",
+          matchType: "in",
+          value: ["doc", "docx"],
+          caseSensitive: false,
+        },
+      ],
       actions: {
         pathTemplate: "{host}/images/{ext}/{yyyy-mm-dd}/{file}",
         conflict: "uniquify",
@@ -26,6 +34,14 @@ const DEFAULT_RULES: RulesConfig = {
           value: ["png", "jpg", "jpeg", "gif", "webp", "svg"],
         },
       ],
+      unifiedConditions: [
+        {
+          conditionType: "extension",
+          matchType: "in",
+          value: ["png", "jpg", "jpeg", "gif", "webp", "svg"],
+          caseSensitive: false,
+        },
+      ],
       actions: {
         pathTemplate: "{host}/images/{ext}/{yyyy-mm-dd}/{file}",
         conflict: "uniquify",
@@ -37,6 +53,14 @@ const DEFAULT_RULES: RulesConfig = {
       enabled: true,
       domains: ["*"],
       conditions: [],
+      unifiedConditions: [
+        {
+          conditionType: "domain",
+          matchType: "glob",
+          value: "*",
+          caseSensitive: false,
+        },
+      ],
       actions: { pathTemplate: "{host}/{file}", conflict: "uniquify" },
     },
   ],
@@ -46,7 +70,7 @@ export const parseRuleConfig = (raw: unknown): RulesConfig =>
   RulesConfigSchema.parse(raw);
 
 export const safeParseRulesConfig = (
-  raw: unknown
+  raw: unknown,
 ):
   | { ok: true; data: RulesConfig }
   | { ok: false; data: RulesConfig; error: string } => {
